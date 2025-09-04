@@ -1,7 +1,13 @@
 {
   "permissions": {
     "allow": [
-      "Read(/C:\\Users\\JauJyeCH\\Desktop\\ocean_shopping_center\\.claude\\rules/**)"
+      "Read(/C:\\Users\\JauJyeCH\\Desktop\\ocean_shopping_center\\.claude\\rules/**)",
+      "mcp__graphiti_ocean-shopping-center__add_memory",
+      "mcp__postgres__list_schemas",
+      "mcp__redis__set",
+      "mcp__redis__get",
+      "mcp__postgres__list_objects",
+      "mcp__postgres__execute_sql"
     ],
     "deny": [],
     "ask": []
