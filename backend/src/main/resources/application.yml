@@ -121,6 +121,114 @@ ocean:
       window-ms: ${RATE_LIMIT_WINDOW:900000} # 15 minutes
       max-requests: ${RATE_LIMIT_MAX_REQUESTS:1000}
 
+# Logistics and Shipping Configuration
+logistics:
+  enabled: ${LOGISTICS_ENABLED:true}
+  
+  # Rate Shopping Settings
+  rate-shopping:
+    enabled: ${RATE_SHOPPING_ENABLED:true}
+    timeout-seconds: ${RATE_SHOPPING_TIMEOUT:30}
+    max-retries: ${RATE_SHOPPING_RETRIES:3}
+    include-disabled-carriers: false
+    cache-rates: true
+    cache-expiry-minutes: 60
+  
+  # Tracking Settings  
+  tracking:
+    enabled: ${TRACKING_ENABLED:true}
+    update-interval-minutes: ${TRACKING_UPDATE_INTERVAL:60}
+    batch-size: ${TRACKING_BATCH_SIZE:10}
+    timeout-seconds: ${TRACKING_TIMEOUT:30}
+    max-retries: ${TRACKING_RETRIES:3}
+    enable-notifications: ${TRACKING_NOTIFICATIONS:true}
+    enable-scheduled-updates: ${TRACKING_SCHEDULED:true}
+    retention-days: 730 # 2 years
+  
+  # Webhook Settings
+  webhook:
+    enabled: ${WEBHOOK_ENABLED:true}
+    base-url: ${WEBHOOK_BASE_URL:https://api.oceanshoppingcenter.com}
+    webhook-path: /api/webhooks/tracking
+    secret-key: ${WEBHOOK_SECRET:change-me-in-production}
+    timeout-seconds: 30
+    validate-signature: true
+    enable-retry-on-failure: true
+    max-retries: 5
+    
+  # DHL Configuration
+  dhl:
+    enabled: ${DHL_ENABLED:false}
+    sandbox: ${DHL_SANDBOX:true}
+    api-key: ${DHL_API_KEY:}
+    api-secret: ${DHL_API_SECRET:}
+    account-number: ${DHL_ACCOUNT_NUMBER:}
+    base-url: https://api-sandbox.dhl.com
+    production-url: https://api.dhl.com
+    timeout-seconds: 30
+    max-retries: 3
+    rate-limit-per-minute: 100
+    default-service: EXPRESS WORLDWIDE
+    default-currency: USD
+    enable-insurance: true
+    enable-signature: false
+    
+  # FedEx Configuration  
+  fedex:
+    enabled: ${FEDEX_ENABLED:false}
+    sandbox: ${FEDEX_SANDBOX:true}
+    api-key: ${FEDEX_API_KEY:}
+    api-secret: ${FEDEX_API_SECRET:}
+    account-number: ${FEDEX_ACCOUNT_NUMBER:}
+    meter-number: ${FEDEX_METER_NUMBER:}
+    base-url: https://apis-sandbox.fedex.com
+    production-url: https://apis.fedex.com
+    timeout-seconds: 30
+    max-retries: 3
+    rate-limit-per-minute: 200
+    default-service: FEDEX_GROUND
+    default-currency: USD
+    enable-insurance: true
+    enable-signature: false
+    enable-saturday-delivery: false
+    
+  # UPS Configuration
+  ups:
+    enabled: ${UPS_ENABLED:false}
+    sandbox: ${UPS_SANDBOX:true}
+    client-id: ${UPS_CLIENT_ID:}
+    client-secret: ${UPS_CLIENT_SECRET:}
+    account-number: ${UPS_ACCOUNT_NUMBER:}
+    access-license-number: ${UPS_ACCESS_LICENSE:}
+    base-url: https://onlinetools.ups.com/sandbox
+    production-url: https://onlinetools.ups.com
+    timeout-seconds: 30
+    max-retries: 3
+    rate-limit-per-minute: 150
+    default-service: UPS_GROUND
+    default-currency: USD
+    enable-insurance: true
+    enable-signature: false
+    enable-saturday-delivery: false
+    shipper-number: ${UPS_SHIPPER_NUMBER:}
+    
+  # USPS Configuration
+  usps:
+    enabled: ${USPS_ENABLED:false}
+    sandbox: ${USPS_SANDBOX:true}
+    user-id: ${USPS_USER_ID:}
+    password: ${USPS_PASSWORD:}
+    api-key: ${USPS_API_KEY:}
+    base-url: https://stg-secure.shippingapis.com
+    production-url: https://secure.shippingapis.com
+    timeout-seconds: 30
+    max-retries: 3
+    rate-limit-per-minute: 100
+    default-service: PRIORITY
+    default-currency: USD
+    enable-insurance: false
+    enable-signature: false
+
 logging:
   level:
     com.ocean.shopping: ${LOG_LEVEL:DEBUG}

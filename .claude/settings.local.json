@@ -11,7 +11,8 @@
       "Read(/C:\\Users\\JauJyeCH\\Desktop\\ocean_shopping_center\\frontend\\src\\pages/**)",
       "mcp__graphiti_ocean-shopping-center__search_memory_facts",
       "Read(/C:\\Users\\JauJyeCH\\Desktop\\ocean_shopping_center\\backend/**)",
-      "mcp__graphiti_ocean-shopping-center__search_memory_nodes"
+      "mcp__graphiti_ocean-shopping-center__search_memory_nodes",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []
