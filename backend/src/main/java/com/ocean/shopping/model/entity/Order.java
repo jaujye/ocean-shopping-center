@@ -174,6 +174,9 @@ public class Order extends BaseEntity {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OrderItem> orderItems;
 
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<OrderCoupon> appliedCoupons;
+
     // Helper methods
     public String getBillingFullName() {
         return billingFirstName + " " + billingLastName;

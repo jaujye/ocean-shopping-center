@@ -10,7 +10,9 @@ public enum OrderStatus {
     SHIPPED("shipped"),
     DELIVERED("delivered"),
     CANCELLED("cancelled"),
-    RETURNED("returned");
+    RETURNED("returned"),
+    REFUNDED("refunded"),
+    PARTIALLY_REFUNDED("partially_refunded");
 
     private final String value;
 

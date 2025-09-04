@@ -9,43 +9,43 @@
       "name": "logistics.dhl",
       "type": "com.ocean.shopping.config.LogisticsProperties$DhlProperties",
       "sourceType": "com.ocean.shopping.config.LogisticsProperties",
-      "sourceMethod": "getDhl()"
+      "sourceMethod": "public com.ocean.shopping.config.LogisticsProperties.DhlProperties getDhl() "
     },
     {
       "name": "logistics.fedex",
       "type": "com.ocean.shopping.config.LogisticsProperties$FedexProperties",
       "sourceType": "com.ocean.shopping.config.LogisticsProperties",
-      "sourceMethod": "getFedex()"
+      "sourceMethod": "public com.ocean.shopping.config.LogisticsProperties.FedexProperties getFedex() "
     },
     {
       "name": "logistics.rate-shopping",
       "type": "com.ocean.shopping.config.LogisticsProperties$RateShoppingProperties",
       "sourceType": "com.ocean.shopping.config.LogisticsProperties",
-      "sourceMethod": "getRateShopping()"
+      "sourceMethod": "public com.ocean.shopping.config.LogisticsProperties.RateShoppingProperties getRateShopping() "
     },
     {
       "name": "logistics.tracking",
       "type": "com.ocean.shopping.config.LogisticsProperties$TrackingProperties",
       "sourceType": "com.ocean.shopping.config.LogisticsProperties",
-      "sourceMethod": "getTracking()"
+      "sourceMethod": "public com.ocean.shopping.config.LogisticsProperties.TrackingProperties getTracking() "
     },
     {
       "name": "logistics.ups",
       "type": "com.ocean.shopping.config.LogisticsProperties$UpsProperties",
       "sourceType": "com.ocean.shopping.config.LogisticsProperties",
-      "sourceMethod": "getUps()"
+      "sourceMethod": "public com.ocean.shopping.config.LogisticsProperties.UpsProperties getUps() "
     },
     {
       "name": "logistics.usps",
       "type": "com.ocean.shopping.config.LogisticsProperties$UspsProperties",
       "sourceType": "com.ocean.shopping.config.LogisticsProperties",
-      "sourceMethod": "getUsps()"
+      "sourceMethod": "public com.ocean.shopping.config.LogisticsProperties.UspsProperties getUsps() "
     },
     {
       "name": "logistics.webhook",
       "type": "com.ocean.shopping.config.LogisticsProperties$WebhookProperties",
       "sourceType": "com.ocean.shopping.config.LogisticsProperties",
-      "sourceMethod": "getWebhook()"
+      "sourceMethod": "public com.ocean.shopping.config.LogisticsProperties.WebhookProperties getWebhook() "
     }
   ],
   "properties": [
@@ -67,75 +67,63 @@
     {
       "name": "logistics.dhl.base-url",
       "type": "java.lang.String",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$DhlProperties",
-      "defaultValue": "https:\/\/api-sandbox.dhl.com"
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$DhlProperties"
     },
     {
       "name": "logistics.dhl.default-currency",
       "type": "java.lang.String",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$DhlProperties",
-      "defaultValue": "USD"
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$DhlProperties"
     },
     {
       "name": "logistics.dhl.default-service",
       "type": "java.lang.String",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$DhlProperties",
-      "defaultValue": "EXPRESS WORLDWIDE"
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$DhlProperties"
     },
     {
       "name": "logistics.dhl.enable-insurance",
       "type": "java.lang.Boolean",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$DhlProperties",
-      "defaultValue": true
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$DhlProperties"
     },
     {
       "name": "logistics.dhl.enable-signature",
       "type": "java.lang.Boolean",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$DhlProperties",
-      "defaultValue": false
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$DhlProperties"
     },
     {
       "name": "logistics.dhl.enabled",
       "type": "java.lang.Boolean",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$DhlProperties",
-      "defaultValue": false
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$DhlProperties"
     },
     {
       "name": "logistics.dhl.max-retries",
       "type": "java.lang.Integer",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$DhlProperties",
-      "defaultValue": 3
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$DhlProperties"
     },
     {
       "name": "logistics.dhl.production-url",
       "type": "java.lang.String",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$DhlProperties",
-      "defaultValue": "https:\/\/api.dhl.com"
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$DhlProperties"
     },
     {
       "name": "logistics.dhl.rate-limit-per-minute",
       "type": "java.lang.Integer",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$DhlProperties",
-      "defaultValue": 100
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$DhlProperties"
     },
     {
       "name": "logistics.dhl.sandbox",
       "type": "java.lang.Boolean",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$DhlProperties",
-      "defaultValue": true
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$DhlProperties"
     },
     {
       "name": "logistics.dhl.timeout-seconds",
       "type": "java.lang.Integer",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$DhlProperties",
-      "defaultValue": 30
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$DhlProperties"
     },
     {
       "name": "logistics.enabled",
       "type": "java.lang.Boolean",
       "description": "Global logistics settings",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties",
-      "defaultValue": true
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties"
     },
     {
       "name": "logistics.fedex.account-number",
@@ -155,50 +143,42 @@
     {
       "name": "logistics.fedex.base-url",
       "type": "java.lang.String",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$FedexProperties",
-      "defaultValue": "https:\/\/apis-sandbox.fedex.com"
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$FedexProperties"
     },
     {
       "name": "logistics.fedex.default-currency",
       "type": "java.lang.String",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$FedexProperties",
-      "defaultValue": "USD"
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$FedexProperties"
     },
     {
       "name": "logistics.fedex.default-service",
       "type": "java.lang.String",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$FedexProperties",
-      "defaultValue": "FEDEX_GROUND"
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$FedexProperties"
     },
     {
       "name": "logistics.fedex.enable-insurance",
       "type": "java.lang.Boolean",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$FedexProperties",
-      "defaultValue": true
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$FedexProperties"
     },
     {
       "name": "logistics.fedex.enable-saturday-delivery",
       "type": "java.lang.Boolean",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$FedexProperties",
-      "defaultValue": false
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$FedexProperties"
     },
     {
       "name": "logistics.fedex.enable-signature",
       "type": "java.lang.Boolean",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$FedexProperties",
-      "defaultValue": false
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$FedexProperties"
     },
     {
       "name": "logistics.fedex.enabled",
       "type": "java.lang.Boolean",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$FedexProperties",
-      "defaultValue": false
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$FedexProperties"
     },
     {
       "name": "logistics.fedex.max-retries",
       "type": "java.lang.Integer",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$FedexProperties",
-      "defaultValue": 3
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$FedexProperties"
     },
     {
       "name": "logistics.fedex.meter-number",
@@ -208,110 +188,92 @@
     {
       "name": "logistics.fedex.production-url",
       "type": "java.lang.String",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$FedexProperties",
-      "defaultValue": "https:\/\/apis.fedex.com"
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$FedexProperties"
     },
     {
       "name": "logistics.fedex.rate-limit-per-minute",
       "type": "java.lang.Integer",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$FedexProperties",
-      "defaultValue": 200
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$FedexProperties"
     },
     {
       "name": "logistics.fedex.sandbox",
       "type": "java.lang.Boolean",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$FedexProperties",
-      "defaultValue": true
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$FedexProperties"
     },
     {
       "name": "logistics.fedex.timeout-seconds",
       "type": "java.lang.Integer",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$FedexProperties",
-      "defaultValue": 30
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$FedexProperties"
     },
     {
       "name": "logistics.rate-shopping.cache-expiry-minutes",
       "type": "java.lang.Integer",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$RateShoppingProperties",
-      "defaultValue": 60
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$RateShoppingProperties"
     },
     {
       "name": "logistics.rate-shopping.cache-rates",
       "type": "java.lang.Boolean",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$RateShoppingProperties",
-      "defaultValue": true
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$RateShoppingProperties"
     },
     {
       "name": "logistics.rate-shopping.enabled",
       "type": "java.lang.Boolean",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$RateShoppingProperties",
-      "defaultValue": true
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$RateShoppingProperties"
     },
     {
       "name": "logistics.rate-shopping.include-disabled-carriers",
       "type": "java.lang.Boolean",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$RateShoppingProperties",
-      "defaultValue": false
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$RateShoppingProperties"
     },
     {
       "name": "logistics.rate-shopping.max-retries",
       "type": "java.lang.Integer",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$RateShoppingProperties",
-      "defaultValue": 3
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$RateShoppingProperties"
     },
     {
       "name": "logistics.rate-shopping.timeout-seconds",
       "type": "java.lang.Integer",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$RateShoppingProperties",
-      "defaultValue": 30
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$RateShoppingProperties"
     },
     {
       "name": "logistics.tracking.batch-size",
       "type": "java.lang.Integer",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$TrackingProperties",
-      "defaultValue": 10
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$TrackingProperties"
     },
     {
       "name": "logistics.tracking.enable-notifications",
       "type": "java.lang.Boolean",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$TrackingProperties",
-      "defaultValue": true
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$TrackingProperties"
     },
     {
       "name": "logistics.tracking.enable-scheduled-updates",
       "type": "java.lang.Boolean",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$TrackingProperties",
-      "defaultValue": true
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$TrackingProperties"
     },
     {
       "name": "logistics.tracking.enabled",
       "type": "java.lang.Boolean",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$TrackingProperties",
-      "defaultValue": true
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$TrackingProperties"
     },
     {
       "name": "logistics.tracking.max-retries",
       "type": "java.lang.Integer",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$TrackingProperties",
-      "defaultValue": 3
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$TrackingProperties"
     },
     {
       "name": "logistics.tracking.retention-days",
       "type": "java.lang.Integer",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$TrackingProperties",
-      "defaultValue": 730
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$TrackingProperties"
     },
     {
       "name": "logistics.tracking.timeout-seconds",
       "type": "java.lang.Integer",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$TrackingProperties",
-      "defaultValue": 30
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$TrackingProperties"
     },
     {
       "name": "logistics.tracking.update-interval-minutes",
       "type": "java.lang.Integer",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$TrackingProperties",
-      "defaultValue": 60
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$TrackingProperties"
     },
     {
       "name": "logistics.ups.access-license-number",
@@ -326,8 +288,7 @@
     {
       "name": "logistics.ups.base-url",
       "type": "java.lang.String",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UpsProperties",
-      "defaultValue": "https:\/\/onlinetools.ups.com\/sandbox"
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UpsProperties"
     },
     {
       "name": "logistics.ups.client-id",
@@ -342,62 +303,52 @@
     {
       "name": "logistics.ups.default-currency",
       "type": "java.lang.String",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UpsProperties",
-      "defaultValue": "USD"
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UpsProperties"
     },
     {
       "name": "logistics.ups.default-service",
       "type": "java.lang.String",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UpsProperties",
-      "defaultValue": "UPS_GROUND"
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UpsProperties"
     },
     {
       "name": "logistics.ups.enable-insurance",
       "type": "java.lang.Boolean",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UpsProperties",
-      "defaultValue": true
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UpsProperties"
     },
     {
       "name": "logistics.ups.enable-saturday-delivery",
       "type": "java.lang.Boolean",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UpsProperties",
-      "defaultValue": false
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UpsProperties"
     },
     {
       "name": "logistics.ups.enable-signature",
       "type": "java.lang.Boolean",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UpsProperties",
-      "defaultValue": false
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UpsProperties"
     },
     {
       "name": "logistics.ups.enabled",
       "type": "java.lang.Boolean",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UpsProperties",
-      "defaultValue": false
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UpsProperties"
     },
     {
       "name": "logistics.ups.max-retries",
       "type": "java.lang.Integer",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UpsProperties",
-      "defaultValue": 3
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UpsProperties"
     },
     {
       "name": "logistics.ups.production-url",
       "type": "java.lang.String",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UpsProperties",
-      "defaultValue": "https:\/\/onlinetools.ups.com"
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UpsProperties"
     },
     {
       "name": "logistics.ups.rate-limit-per-minute",
       "type": "java.lang.Integer",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UpsProperties",
-      "defaultValue": 150
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UpsProperties"
     },
     {
       "name": "logistics.ups.sandbox",
       "type": "java.lang.Boolean",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UpsProperties",
-      "defaultValue": true
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UpsProperties"
     },
     {
       "name": "logistics.ups.shipper-number",
@@ -407,8 +358,7 @@
     {
       "name": "logistics.ups.timeout-seconds",
       "type": "java.lang.Integer",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UpsProperties",
-      "defaultValue": 30
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UpsProperties"
     },
     {
       "name": "logistics.usps.api-key",
@@ -418,44 +368,37 @@
     {
       "name": "logistics.usps.base-url",
       "type": "java.lang.String",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UspsProperties",
-      "defaultValue": "https:\/\/stg-secure.shippingapis.com"
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UspsProperties"
     },
     {
       "name": "logistics.usps.default-currency",
       "type": "java.lang.String",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UspsProperties",
-      "defaultValue": "USD"
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UspsProperties"
     },
     {
       "name": "logistics.usps.default-service",
       "type": "java.lang.String",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UspsProperties",
-      "defaultValue": "PRIORITY"
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UspsProperties"
     },
     {
       "name": "logistics.usps.enable-insurance",
       "type": "java.lang.Boolean",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UspsProperties",
-      "defaultValue": false
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UspsProperties"
     },
     {
       "name": "logistics.usps.enable-signature",
       "type": "java.lang.Boolean",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UspsProperties",
-      "defaultValue": false
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UspsProperties"
     },
     {
       "name": "logistics.usps.enabled",
       "type": "java.lang.Boolean",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UspsProperties",
-      "defaultValue": false
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UspsProperties"
     },
     {
       "name": "logistics.usps.max-retries",
       "type": "java.lang.Integer",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UspsProperties",
-      "defaultValue": 3
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UspsProperties"
     },
     {
       "name": "logistics.usps.password",
@@ -465,26 +408,22 @@
     {
       "name": "logistics.usps.production-url",
       "type": "java.lang.String",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UspsProperties",
-      "defaultValue": "https:\/\/secure.shippingapis.com"
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UspsProperties"
     },
     {
       "name": "logistics.usps.rate-limit-per-minute",
       "type": "java.lang.Integer",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UspsProperties",
-      "defaultValue": 100
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UspsProperties"
     },
     {
       "name": "logistics.usps.sandbox",
       "type": "java.lang.Boolean",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UspsProperties",
-      "defaultValue": true
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UspsProperties"
     },
     {
       "name": "logistics.usps.timeout-seconds",
       "type": "java.lang.Integer",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UspsProperties",
-      "defaultValue": 30
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$UspsProperties"
     },
     {
       "name": "logistics.usps.user-id",
@@ -494,50 +433,42 @@
     {
       "name": "logistics.webhook.base-url",
       "type": "java.lang.String",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$WebhookProperties",
-      "defaultValue": "https:\/\/api.oceanshoppingcenter.com"
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$WebhookProperties"
     },
     {
       "name": "logistics.webhook.enable-retry-on-failure",
       "type": "java.lang.Boolean",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$WebhookProperties",
-      "defaultValue": true
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$WebhookProperties"
     },
     {
       "name": "logistics.webhook.enabled",
       "type": "java.lang.Boolean",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$WebhookProperties",
-      "defaultValue": true
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$WebhookProperties"
     },
     {
       "name": "logistics.webhook.max-retries",
       "type": "java.lang.Integer",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$WebhookProperties",
-      "defaultValue": 5
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$WebhookProperties"
     },
     {
       "name": "logistics.webhook.secret-key",
       "type": "java.lang.String",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$WebhookProperties",
-      "defaultValue": "change-me-in-production"
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$WebhookProperties"
     },
     {
       "name": "logistics.webhook.timeout-seconds",
       "type": "java.lang.Integer",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$WebhookProperties",
-      "defaultValue": 30
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$WebhookProperties"
     },
     {
       "name": "logistics.webhook.validate-signature",
       "type": "java.lang.Boolean",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$WebhookProperties",
-      "defaultValue": true
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$WebhookProperties"
     },
     {
       "name": "logistics.webhook.webhook-path",
       "type": "java.lang.String",
-      "sourceType": "com.ocean.shopping.config.LogisticsProperties$WebhookProperties",
-      "defaultValue": "\/api\/webhooks\/tracking"
+      "sourceType": "com.ocean.shopping.config.LogisticsProperties$WebhookProperties"
     }
   ],
   "hints": []
