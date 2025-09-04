@@ -4,7 +4,8 @@ status: backlog
 created: 2025-09-04T11:08:50Z
 progress: 0%
 prd: .claude/prds/ocean-shopping-center.md
-github: [Will be updated when synced to GitHub]
+github: https://github.com/jaujye/ocean-shopping-center/issues/1
+updated: 2025-09-04T12:26:52Z
 ---
 
 # Epic: Ocean Shopping Center
@@ -184,14 +185,14 @@ High-level task categories (8 total):
 4. Performance optimization and deployment (Week 7-8)
 
 ## Tasks Created
-- [ ] 001.md - Infrastructure and Database Setup (parallel: true)
-- [ ] 002.md - Spring Boot Backend Foundation (parallel: false)
-- [ ] 003.md - Authentication and Authorization System (parallel: false)
-- [ ] 004.md - React Frontend Foundation (parallel: true)
-- [ ] 005.md - Product Management System (parallel: false)
-- [ ] 006.md - Order Processing and Payment System (parallel: false)
-- [ ] 007.md - Real-time Communication and Logistics (parallel: false)
-- [ ] 008.md - Deployment and Performance Optimization (parallel: false)
+- [ ] #2 - Infrastructure and Database Setup (parallel: true)
+- [ ] #3 - Spring Boot Backend Foundation (parallel: false)
+- [ ] #4 - Authentication and Authorization System (parallel: false)
+- [ ] #5 - React Frontend Foundation (parallel: true)
+- [ ] #6 - Product Management System (parallel: false)
+- [ ] #7 - Order Processing and Payment System (parallel: false)
+- [ ] #8 - Real-time Communication and Logistics (parallel: false)
+- [ ] #9 - Deployment and Performance Optimization (parallel: false)
 
 Total tasks: 8
 Parallel tasks: 2
