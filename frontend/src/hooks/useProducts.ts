@@ -77,16 +77,20 @@ export const useProducts = (initialFilters?: ProductFilters): UseProductsReturn 
       
       setState(prev => ({
         ...prev,
-        products: response.data,
-        pagination: response.pagination,
+        products: response.data || [],
+        pagination: response.pagination || prev.pagination,
         loading: false,
         selectedProducts: [], // Clear selection on new fetch
       }));
     } catch (error) {
+      console.error('Failed to fetch products:', error);
       setState(prev => ({
         ...prev,
         loading: false,
-        error: error instanceof Error ? error.message : 'Failed to fetch products',
+        error: error instanceof Error 
+          ? error.message 
+          : 'Failed to fetch products. Please check your connection and try again.',
+        products: [], // Clear products on error
       }));
     }
   }, [filters, state.pagination.page, state.pagination.limit]);

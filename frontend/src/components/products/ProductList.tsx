@@ -21,11 +21,11 @@ import Input from '../ui/Input';
 import Card, { CardContent } from '../ui/Card';
 import Modal from '../ui/Modal';
 import LoadingSpinner from '../ui/LoadingSpinner';
+import { Product } from '../../types';
 import {
-  Product,
   ProductFilters,
   BulkAction,
-} from '../types/product';
+} from '../../types/product';
 
 interface ProductListProps {
   products: Product[];

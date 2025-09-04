@@ -10,7 +10,8 @@
       "mcp__postgres__execute_sql",
       "Read(/C:\\Users\\JauJyeCH\\Desktop\\ocean_shopping_center\\frontend\\src\\pages/**)",
       "mcp__graphiti_ocean-shopping-center__search_memory_facts",
-      "Read(/C:\\Users\\JauJyeCH\\Desktop\\ocean_shopping_center\\backend/**)"
+      "Read(/C:\\Users\\JauJyeCH\\Desktop\\ocean_shopping_center\\backend/**)",
+      "mcp__graphiti_ocean-shopping-center__search_memory_nodes"
     ],
     "deny": [],
     "ask": []
