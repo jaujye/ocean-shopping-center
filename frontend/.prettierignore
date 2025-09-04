@@ -1,0 +1,9 @@
+build
+node_modules
+*.min.js
+*.min.css
+public/
+coverage/
+.git/
+.env
+package-lock.json
