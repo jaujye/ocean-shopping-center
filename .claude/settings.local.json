@@ -12,7 +12,11 @@
       "mcp__graphiti_ocean-shopping-center__search_memory_facts",
       "Read(/C:\\Users\\JauJyeCH\\Desktop\\ocean_shopping_center\\backend/**)",
       "mcp__graphiti_ocean-shopping-center__search_memory_nodes",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git checkout:*)",
+      "Bash(git pull:*)"
     ],
     "deny": [],
     "ask": []
