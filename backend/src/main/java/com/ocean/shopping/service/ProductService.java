@@ -226,7 +226,7 @@ public class ProductService {
         log.debug("Getting related products for product ID: {} with limit: {}", productId, limit);
 
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new NotFoundException("Product not found with ID: " + productId));
+                .orElseThrow(() -> ResourceNotFoundException.forEntity("Product", productId));
 
         if (product.getCategory() == null) {
             return List.of();
@@ -283,7 +283,7 @@ public class ProductService {
     @Transactional(readOnly = true)
     public boolean isProductAvailable(UUID productId, int quantity) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new NotFoundException("Product not found with ID: " + productId));
+                .orElseThrow(() -> ResourceNotFoundException.forEntity("Product", productId));
 
         if (!product.getIsActive()) {
             return false;
@@ -304,7 +304,7 @@ public class ProductService {
         log.debug("Updating inventory for product ID: {} with quantity change: {}", productId, quantityChange);
 
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new NotFoundException("Product not found with ID: " + productId));
+                .orElseThrow(() -> ResourceNotFoundException.forEntity("Product", productId));
 
         if (!product.getTrackInventory()) {
             log.debug("Product does not track inventory, skipping update");

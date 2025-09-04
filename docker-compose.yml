@@ -84,7 +84,7 @@ services:
     profiles:
       - dev
 
-  # Application Backend (placeholder for future implementation)
+  # Application Backend - Spring Boot
   backend:
     build:
       context: ./backend
@@ -92,15 +92,22 @@ services:
     container_name: ocean_backend
     restart: unless-stopped
     environment:
-      NODE_ENV: ${NODE_ENV:-development}
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-ocean_shopping_center}
-      REDIS_URL: redis://redis:6379
-      PORT: ${BACKEND_PORT:-3000}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-ocean_shopping_center}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+      SPRING_REDIS_DATABASE: ${REDIS_DATABASE:-0}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${JPA_DDL_AUTO:-validate}
+      SERVER_PORT: ${BACKEND_PORT:-8080}
+      JWT_SECRET: ${JWT_SECRET:-ocean_shopping_center_jwt_secret_key_2025}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://frontend:3000}
     ports:
-      - "${BACKEND_PORT:-3000}:3000"
+      - "${BACKEND_PORT:-8080}:8080"
     volumes:
-      - ./backend:/app
-      - /app/node_modules
+      - ./backend/logs:/app/logs
     networks:
       - ocean_network
     depends_on:
@@ -110,6 +117,12 @@ services:
         condition: service_healthy
     profiles:
       - app
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   # Application Frontend (placeholder for future implementation)
   frontend:
