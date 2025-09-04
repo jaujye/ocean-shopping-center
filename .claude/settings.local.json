@@ -7,7 +7,8 @@
       "mcp__redis__set",
       "mcp__redis__get",
       "mcp__postgres__list_objects",
-      "mcp__postgres__execute_sql"
+      "mcp__postgres__execute_sql",
+      "Read(/C:\\Users\\JauJyeCH\\Desktop\\ocean_shopping_center\\frontend\\src\\pages/**)"
     ],
     "deny": [],
     "ask": []

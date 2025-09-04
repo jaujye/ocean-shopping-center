@@ -58,9 +58,9 @@ const Button: React.FC<ButtonProps> = ({
 
   // If asChild is true, return children with button styles applied
   if (asChild && React.isValidElement(children)) {
-    const childProps = children.props as any;
     return React.cloneElement(children, {
-      className: cn(buttonClasses, childProps.className),
+      ...children.props,
+      className: cn(buttonClasses, (children.props as any)?.className),
     } as any);
   }
 

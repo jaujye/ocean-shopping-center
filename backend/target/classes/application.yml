@@ -1,0 +1,185 @@
+spring:
+  application:
+    name: ocean-shopping-center
+    
+  profiles:
+    active: development
+    
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:ocean_shopping_center}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+        implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: false
+        use_sql_comments: false
+        jdbc:
+          batch_size: 25
+          order_inserts: true
+          order_updates: true
+        connection:
+          provider_disables_autocommit: true
+        query:
+          in_clause_parameter_padding: true
+        temp:
+          use_jdbc_metadata_defaults: false
+    open-in-view: false
+    
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+          
+  session:
+    store-type: redis
+    redis:
+      namespace: "ocean:sessions"
+    timeout: ${SESSION_MAX_AGE:86400}s
+    
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${JWT_ISSUER_URI:}
+    
+server:
+  port: ${BACKEND_PORT:3000}
+  servlet:
+    context-path: /api
+    session:
+      cookie:
+        name: OCEANSESSIONID
+        http-only: true
+        secure: false
+        same-site: lax
+        max-age: ${SESSION_MAX_AGE:86400}
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+    min-response-size: 1024
+    
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+      show-components: always
+  health:
+    redis:
+      enabled: true
+    db:
+      enabled: true
+      
+ocean:
+  shopping:
+    jwt:
+      secret: ${JWT_SECRET:ocean_shopping_dev_jwt_secret_2024}
+      expiration: ${JWT_EXPIRES_IN:604800000} # 7 days in milliseconds
+      refresh-expiration: 2592000000 # 30 days in milliseconds
+    cors:
+      allowed-origins: ${CORS_ORIGIN:http://localhost:3001,http://localhost:3000}
+      allowed-methods: GET,POST,PUT,DELETE,PATCH,OPTIONS
+      allowed-headers: "*"
+      allow-credentials: ${CORS_CREDENTIALS:true}
+    upload:
+      max-file-size: ${MAX_FILE_SIZE:5242880} # 5MB
+      path: ${UPLOAD_PATH:./uploads}
+      allowed-types: ${ALLOWED_FILE_TYPES:jpg,jpeg,png,gif,pdf,doc,docx}
+    cache:
+      ttl: ${CACHE_TTL:60}
+      product-ttl: ${PRODUCT_CACHE_TTL:120}
+      user-ttl: ${USER_CACHE_TTL:180}
+    rate-limit:
+      window-ms: ${RATE_LIMIT_WINDOW:900000} # 15 minutes
+      max-requests: ${RATE_LIMIT_MAX_REQUESTS:1000}
+
+logging:
+  level:
+    com.ocean.shopping: ${LOG_LEVEL:DEBUG}
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
+    org.hibernate.type.descriptor.sql.BasicBinder: WARN
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: ${LOG_FILE:./logs/ocean-shopping.log}
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      total-size-cap: 100MB
+      max-history: 30
+
+---
+spring:
+  config:
+    activate:
+      on-profile: development
+  jpa:
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+  h2:
+    console:
+      enabled: false
+
+ocean:
+  shopping:
+    cors:
+      allowed-origins: "http://localhost:3001,http://localhost:3000,http://127.0.0.1:3001"
+
+---
+spring:
+  config:
+    activate:
+      on-profile: production
+  jpa:
+    properties:
+      hibernate:
+        show_sql: false
+        format_sql: false
+        
+server:
+  servlet:
+    session:
+      cookie:
+        secure: true
+        
+logging:
+  level:
+    com.ocean.shopping: INFO
+    root: WARN
+
+ocean:
+  shopping:
+    cors:
+      allowed-origins: "${PRODUCTION_FRONTEND_URL:https://oceanshoppingcenter.com}"
