@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(/C:\\Users\\JauJyeCH\\Desktop\\ocean_shopping_center\\.claude\\rules/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
