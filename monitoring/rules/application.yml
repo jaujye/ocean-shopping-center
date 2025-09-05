@@ -1,0 +1,137 @@
+groups:
+  - name: ocean_shopping_center.application
+    rules:
+      # Application Health Alerts
+      - alert: ApplicationDown
+        expr: up{job="ocean-backend"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          service: backend
+        annotations:
+          summary: "Ocean Shopping Center backend is down"
+          description: "The backend application has been down for more than 30 seconds on instance {{ $labels.instance }}"
+          runbook_url: "http://docs.oceanshoppingcenter.com/runbooks/application-down"
+
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: critical
+          service: backend
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value | humanizePercentage }} for endpoint {{ $labels.uri }} on instance {{ $labels.instance }}"
+
+      - alert: HighLatency
+        expr: histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m])) > 0.2
+        for: 5m
+        labels:
+          severity: warning
+          service: backend
+        annotations:
+          summary: "High latency detected"
+          description: "99th percentile latency is {{ $value }}s for endpoint {{ $labels.uri }} on instance {{ $labels.instance }}"
+
+      - alert: LowThroughput
+        expr: rate(http_requests_total[5m]) < 1
+        for: 10m
+        labels:
+          severity: warning
+          service: backend
+        annotations:
+          summary: "Low throughput detected"
+          description: "Request rate is {{ $value }} req/s for endpoint {{ $labels.uri }} on instance {{ $labels.instance }}"
+
+      # JVM Health Alerts
+      - alert: HighMemoryUsage
+        expr: (jvm_memory_used_bytes{area="heap"} / jvm_memory_max_bytes{area="heap"}) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          service: backend
+        annotations:
+          summary: "High JVM memory usage"
+          description: "JVM heap memory usage is {{ $value | humanizePercentage }} on instance {{ $labels.instance }}"
+
+      - alert: HighGCTime
+        expr: rate(jvm_gc_collection_seconds_sum[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: backend
+        annotations:
+          summary: "High garbage collection time"
+          description: "GC time is {{ $value }}s/s on instance {{ $labels.instance }}"
+
+      - alert: TooManyThreads
+        expr: jvm_threads_current > 500
+        for: 5m
+        labels:
+          severity: warning
+          service: backend
+        annotations:
+          summary: "Too many JVM threads"
+          description: "Thread count is {{ $value }} on instance {{ $labels.instance }}"
+
+      # Business Logic Alerts
+      - alert: PaymentProcessingDown
+        expr: up{job="payment-metrics"} == 0 OR rate(payment_success_total[5m]) == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: payment
+        annotations:
+          summary: "Payment processing is not working"
+          description: "Payment processing has stopped working on instance {{ $labels.instance }}"
+
+      - alert: HighPaymentFailureRate
+        expr: rate(payment_failure_total[5m]) / rate(payment_total[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          service: payment
+        annotations:
+          summary: "High payment failure rate"
+          description: "Payment failure rate is {{ $value | humanizePercentage }} on instance {{ $labels.instance }}"
+
+      - alert: LowOrderVolume
+        expr: rate(order_created_total[1h]) < 0.1
+        for: 30m
+        labels:
+          severity: warning
+          service: business
+        annotations:
+          summary: "Unusually low order volume"
+          description: "Order creation rate is {{ $value }} orders/hour, which is unusually low"
+
+      - alert: InventoryLow
+        expr: inventory_items_low_stock > 0
+        for: 5m
+        labels:
+          severity: warning
+          service: inventory
+        annotations:
+          summary: "Low inventory detected"
+          description: "{{ $value }} items are low in stock"
+
+      # Session and User Management
+      - alert: TooManyActiveSessions
+        expr: active_sessions_count > 50000
+        for: 5m
+        labels:
+          severity: warning
+          service: session
+        annotations:
+          summary: "High number of active sessions"
+          description: "Active session count is {{ $value }}, which may indicate a problem"
+
+      - alert: UserRegistrationDown
+        expr: rate(user_registration_total[10m]) == 0
+        for: 10m
+        labels:
+          severity: warning
+          service: user
+        annotations:
+          summary: "User registration has stopped"
+          description: "No user registrations in the last 10 minutes"

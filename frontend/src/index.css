@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@theme {
+  --color-ocean-50: #f0fdff;
+  --color-ocean-100: #ccf7fe;
+  --color-ocean-200: #99eefd;
+  --color-ocean-300: #5ddefa;
+  --color-ocean-400: #14c5f0;
+  --color-ocean-500: #00a9d6;
+  --color-ocean-600: #0284b5;
+  --color-ocean-700: #0a6b93;
+  --color-ocean-800: #0e5778;
+  --color-ocean-900: #124965;
+  --color-ocean-950: #052f44;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: theme(colors.slate.50);
+  color: theme(colors.slate.900);
+}
+
+/* Ocean wave animation */
+.wave-animation {
+  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 25%, #0369a1 50%, #075985 75%, #0c4a6e 100%);
+  background-size: 400% 400%;
+  animation: oceanWave 8s ease-in-out infinite;
+}
+
+@keyframes oceanWave {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Glass morphism effect */
+.glass {
+  background-color: rgb(255 255 255 / 0.1);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgb(255 255 255 / 0.2);
+}
+
+/* Ocean button styles */
+.btn-ocean {
+  background-color: theme(colors.ocean.500);
+  color: white;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s;
+}
+
+.btn-ocean:hover {
+  background-color: theme(colors.ocean.600);
+}
+
+.btn-ocean-outline {
+  border: 2px solid theme(colors.ocean.500);
+  color: theme(colors.ocean.500);
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+}
+
+.btn-ocean-outline:hover {
+  background-color: theme(colors.ocean.500);
+  color: white;
+}

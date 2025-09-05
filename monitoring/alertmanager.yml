@@ -1,0 +1,127 @@
+global:
+  smtp_smarthost: '${SMTP_HOST}:${SMTP_PORT}'
+  smtp_from: '${ALERT_EMAIL_FROM}'
+  smtp_auth_username: '${SMTP_USERNAME}'
+  smtp_auth_password: '${SMTP_PASSWORD}'
+  smtp_require_tls: true
+
+route:
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+  receiver: 'web.hook'
+  routes:
+    - match:
+        severity: critical
+      receiver: 'critical-alerts'
+      group_wait: 5s
+      repeat_interval: 5m
+    - match:
+        severity: warning
+      receiver: 'warning-alerts'
+      repeat_interval: 15m
+    - match:
+        service: 'payment'
+      receiver: 'payment-alerts'
+      group_wait: 1s
+      repeat_interval: 1m
+
+receivers:
+  - name: 'web.hook'
+    webhook_configs:
+      - url: 'http://localhost:5001/webhook'
+        send_resolved: true
+
+  - name: 'critical-alerts'
+    email_configs:
+      - to: '${ALERT_EMAIL_TO}'
+        subject: '🚨 CRITICAL Alert - Ocean Shopping Center'
+        body: |
+          Alert: {{ .GroupLabels.alertname }}
+          Summary: {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}
+          Description: {{ range .Alerts }}{{ .Annotations.description }}{{ end }}
+          Severity: {{ .GroupLabels.severity }}
+          Service: {{ .GroupLabels.service }}
+          Instance: {{ .GroupLabels.instance }}
+          
+          Dashboard: http://grafana.oceanshoppingcenter.com/d/overview/
+          Runbook: http://docs.oceanshoppingcenter.com/runbooks/{{ .GroupLabels.alertname }}
+        html: |
+          <h2>🚨 CRITICAL Alert</h2>
+          <p><strong>Alert:</strong> {{ .GroupLabels.alertname }}</p>
+          <p><strong>Summary:</strong> {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}</p>
+          <p><strong>Description:</strong> {{ range .Alerts }}{{ .Annotations.description }}{{ end }}</p>
+          <p><strong>Severity:</strong> <span style="color: red;">{{ .GroupLabels.severity }}</span></p>
+          <p><strong>Service:</strong> {{ .GroupLabels.service }}</p>
+          <p><strong>Instance:</strong> {{ .GroupLabels.instance }}</p>
+          
+          <p><a href="http://grafana.oceanshoppingcenter.com/d/overview/">View Dashboard</a></p>
+          <p><a href="http://docs.oceanshoppingcenter.com/runbooks/{{ .GroupLabels.alertname }}">View Runbook</a></p>
+    slack_configs:
+      - api_url: '${SLACK_API_URL}'
+        channel: '#alerts-critical'
+        title: '🚨 Critical Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          *Alert:* {{ .GroupLabels.alertname }}
+          *Summary:* {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}
+          *Severity:* {{ .GroupLabels.severity }}
+          *Service:* {{ .GroupLabels.service }}
+          *Instance:* {{ .GroupLabels.instance }}
+          
+          <http://grafana.oceanshoppingcenter.com/d/overview/|Dashboard> | <http://docs.oceanshoppingcenter.com/runbooks/{{ .GroupLabels.alertname }}|Runbook>
+
+  - name: 'warning-alerts'
+    email_configs:
+      - to: '${ALERT_EMAIL_TO}'
+        subject: '⚠️  Warning Alert - Ocean Shopping Center'
+        body: |
+          Alert: {{ .GroupLabels.alertname }}
+          Summary: {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}
+          Description: {{ range .Alerts }}{{ .Annotations.description }}{{ end }}
+          Severity: {{ .GroupLabels.severity }}
+          Service: {{ .GroupLabels.service }}
+          Instance: {{ .GroupLabels.instance }}
+    slack_configs:
+      - api_url: '${SLACK_API_URL}'
+        channel: '#alerts-warning'
+        title: '⚠️  Warning: {{ .GroupLabels.alertname }}'
+        text: |
+          *Alert:* {{ .GroupLabels.alertname }}
+          *Summary:* {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}
+          *Severity:* {{ .GroupLabels.severity }}
+          *Service:* {{ .GroupLabels.service }}
+
+  - name: 'payment-alerts'
+    email_configs:
+      - to: '${PAYMENT_ALERT_EMAIL}'
+        subject: '💳 Payment System Alert - Ocean Shopping Center'
+        body: |
+          PAYMENT SYSTEM ALERT
+          
+          Alert: {{ .GroupLabels.alertname }}
+          Summary: {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}
+          Description: {{ range .Alerts }}{{ .Annotations.description }}{{ end }}
+          
+          This requires immediate attention as it affects payment processing.
+    slack_configs:
+      - api_url: '${SLACK_API_URL}'
+        channel: '#payments'
+        title: '💳 Payment Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          *PAYMENT SYSTEM ALERT*
+          
+          *Alert:* {{ .GroupLabels.alertname }}
+          *Summary:* {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}
+          
+          This requires immediate attention as it affects payment processing.
+
+inhibit_rules:
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'cluster', 'service']
+
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'

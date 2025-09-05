@@ -1,0 +1,148 @@
+# Prometheus Configuration for Ocean Shopping Center
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['alertmanager:9093']
+
+# Load rules once and periodically evaluate them
+rule_files:
+  - "/etc/prometheus/rules/*.yml"
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Spring Boot Application - Backend
+  - job_name: 'ocean-backend'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['backend:8080']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: backend:8080
+
+  # PostgreSQL Database Metrics via Exporter
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+    scrape_interval: 30s
+    relabel_configs:
+      - target_label: service
+        replacement: database
+
+  # Redis Metrics via Exporter  
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+    scrape_interval: 30s
+    relabel_configs:
+      - target_label: service
+        replacement: cache
+
+  # Nginx Metrics via Exporter
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx-exporter:9113']
+    scrape_interval: 15s
+    relabel_configs:
+      - target_label: service
+        replacement: loadbalancer
+
+  # Node Exporter for system metrics
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 15s
+    relabel_configs:
+      - target_label: service
+        replacement: system
+
+  # Application Custom Metrics
+  - job_name: 'ocean-app-metrics'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['backend:8080']
+    metric_relabel_configs:
+      # Keep only application-specific metrics
+      - source_labels: [__name__]
+        regex: 'ocean_.*|http_requests_.*|jvm_.*|system_.*|process_.*'
+        action: keep
+      
+      # Add environment labels
+      - target_label: environment
+        replacement: 'production'
+      - target_label: application
+        replacement: 'ocean-shopping-center'
+
+  # Database Connection Pool Metrics
+  - job_name: 'hikaricp'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['backend:8080']
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'hikaricp_.*'
+        action: keep
+
+  # Payment Processing Metrics
+  - job_name: 'payment-metrics'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['backend:8080']
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'payment_.*|stripe_.*|order_.*|cart_.*'
+        action: keep
+
+  # WebSocket Connection Metrics
+  - job_name: 'websocket-metrics'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['backend:8080']
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'websocket_.*|stomp_.*|session_.*'
+        action: keep
+
+  # Jaeger Tracing Metrics
+  - job_name: 'jaeger'
+    static_configs:
+      - targets: ['jaeger:14269']
+    scrape_interval: 30s
+    metrics_path: '/metrics'
+    relabel_configs:
+      - target_label: service
+        replacement: tracing
+
+  # AlertManager Metrics
+  - job_name: 'alertmanager'
+    static_configs:
+      - targets: ['alertmanager:9093']
+    scrape_interval: 30s
+    relabel_configs:
+      - target_label: service
+        replacement: alerting
+
+# Remote write configuration for long-term storage (optional)
+# remote_write:
+#   - url: "https://prometheus-remote-write-endpoint/api/v1/write"
+#     basic_auth:
+#       username: "username"
+#       password: "password"

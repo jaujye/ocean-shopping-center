@@ -1,0 +1,453 @@
+spring:
+  application:
+    name: ocean-shopping-center
+    
+  profiles:
+    active: development
+    
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:ocean_shopping_center}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+        implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: false
+        use_sql_comments: false
+        jdbc:
+          batch_size: 25
+          order_inserts: true
+          order_updates: true
+        connection:
+          provider_disables_autocommit: true
+        query:
+          in_clause_parameter_padding: true
+        temp:
+          use_jdbc_metadata_defaults: false
+    open-in-view: false
+    
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+          
+  session:
+    store-type: redis
+    redis:
+      namespace: "ocean:sessions"
+    timeout: ${SESSION_MAX_AGE:86400}s
+    
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${JWT_ISSUER_URI:}
+    
+server:
+  port: ${BACKEND_PORT:3000}
+  servlet:
+    context-path: /api
+    session:
+      cookie:
+        name: OCEANSESSIONID
+        http-only: true
+        secure: ${COOKIE_SECURE:false}
+        same-site: ${COOKIE_SAME_SITE:lax}
+        max-age: ${SESSION_MAX_AGE:86400}
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+    min-response-size: 1024
+  
+  # SSL/HTTPS Configuration
+  ssl:
+    enabled: ${SSL_ENABLED:false}
+    key-store: ${SSL_KEY_STORE:}
+    key-store-password: ${SSL_KEY_STORE_PASSWORD:}
+    key-store-type: ${SSL_KEY_STORE_TYPE:PKCS12}
+    key-alias: ${SSL_KEY_ALIAS:oceanshoppingcenter}
+    ciphers: TLS_AES_256_GCM_SHA384,TLS_CHACHA20_POLY1305_SHA256,TLS_AES_128_GCM_SHA256,ECDHE-RSA-AES256-GCM-SHA384,ECDHE-RSA-AES128-GCM-SHA256
+    enabled-protocols: TLSv1.2,TLSv1.3
+  
+  # Security Configuration
+  forward-headers-strategy: framework
+  use-forward-headers: ${USE_FORWARD_HEADERS:true}
+  
+  # Error handling
+  error:
+    whitelabel:
+      enabled: false
+    include-message: on_param
+    include-binding-errors: on_param
+    include-stacktrace: on_param
+    
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+      show-components: always
+  health:
+    redis:
+      enabled: true
+    db:
+      enabled: true
+      
+ocean:
+  shopping:
+    jwt:
+      secret: ${JWT_SECRET:ocean_shopping_dev_jwt_secret_2024}
+      expiration: ${JWT_EXPIRES_IN:604800000} # 7 days in milliseconds
+      refresh-expiration: 2592000000 # 30 days in milliseconds
+    cors:
+      allowed-origins: ${CORS_ORIGIN:http://localhost:3001,http://localhost:3000}
+      allowed-methods: GET,POST,PUT,DELETE,PATCH,OPTIONS
+      allowed-headers: "*"
+      allow-credentials: ${CORS_CREDENTIALS:true}
+    upload:
+      max-file-size: ${MAX_FILE_SIZE:5242880} # 5MB
+      path: ${UPLOAD_PATH:./uploads}
+      allowed-types: ${ALLOWED_FILE_TYPES:jpg,jpeg,png,gif,pdf,doc,docx}
+    cache:
+      ttl: ${CACHE_TTL:60}
+      product-ttl: ${PRODUCT_CACHE_TTL:120}
+      user-ttl: ${USER_CACHE_TTL:180}
+    rate-limit:
+      window-ms: ${RATE_LIMIT_WINDOW:900000} # 15 minutes
+      max-requests: ${RATE_LIMIT_MAX_REQUESTS:1000}
+
+# Payment Gateway Configuration
+payment:
+  stripe:
+    enabled: ${STRIPE_ENABLED:true}
+    public-key: ${STRIPE_PUBLIC_KEY:pk_test_default}
+    secret-key: ${STRIPE_SECRET_KEY:sk_test_default}
+    webhook-secret: ${STRIPE_WEBHOOK_SECRET:whsec_default}
+    sandbox: ${STRIPE_SANDBOX:true}
+    timeout-seconds: 30
+    max-retries: 3
+    capture-method: automatic # automatic or manual
+    confirmation-method: automatic # automatic or manual
+    
+  paypal:
+    enabled: ${PAYPAL_ENABLED:false}
+    client-id: ${PAYPAL_CLIENT_ID:}
+    client-secret: ${PAYPAL_CLIENT_SECRET:}
+    webhook-id: ${PAYPAL_WEBHOOK_ID:}
+    sandbox: ${PAYPAL_SANDBOX:true}
+    base-url: https://api-m.sandbox.paypal.com
+    production-url: https://api-m.paypal.com
+    timeout-seconds: 30
+    max-retries: 3
+    
+  # General payment settings
+  settings:
+    default-currency: ${PAYMENT_DEFAULT_CURRENCY:USD}
+    supported-currencies: ${PAYMENT_CURRENCIES:USD,EUR,GBP}
+    max-payment-amount: ${MAX_PAYMENT_AMOUNT:99999.99}
+    min-payment-amount: ${MIN_PAYMENT_AMOUNT:0.50}
+    enable-saved-payment-methods: ${ENABLE_SAVED_PAYMENT_METHODS:true}
+    auto-capture-threshold: ${AUTO_CAPTURE_THRESHOLD:1000.00}
+    refund-policy-days: ${REFUND_POLICY_DAYS:30}
+    
+  # Security settings
+  security:
+    enable-fraud-detection: ${ENABLE_FRAUD_DETECTION:true}
+    max-failed-attempts: ${MAX_PAYMENT_FAILURES:3}
+    block-duration-minutes: ${PAYMENT_BLOCK_DURATION:60}
+    require-cvv-for-saved-cards: ${REQUIRE_CVV_SAVED_CARDS:true}
+    enable-3ds: ${ENABLE_3DS:true}
+    
+  # Webhook settings
+  webhook:
+    retry-attempts: ${WEBHOOK_RETRY_ATTEMPTS:3}
+    retry-delay-seconds: ${WEBHOOK_RETRY_DELAY:30}
+    signature-tolerance-seconds: ${WEBHOOK_SIGNATURE_TOLERANCE:300}
+    
+# Email Configuration for payment notifications
+mail:
+  smtp:
+    enabled: ${EMAIL_ENABLED:false}
+    host: ${SMTP_HOST:localhost}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          ssl:
+            trust: "*"
+  from: ${EMAIL_FROM:noreply@oceanshoppingcenter.com}
+  
+# Invoice Configuration
+invoice:
+  enabled: ${INVOICE_ENABLED:true}
+  storage-path: ${INVOICE_PATH:./invoices}
+  pdf-engine: itext
+  template-path: ${INVOICE_TEMPLATE_PATH:classpath:templates/invoice}
+  number-format: "INV-{year}-{month}-{sequence}"
+  auto-generate: true
+  include-tax-breakdown: true
+
+# Logistics and Shipping Configuration
+logistics:
+  enabled: ${LOGISTICS_ENABLED:true}
+  
+  # Rate Shopping Settings
+  rate-shopping:
+    enabled: ${RATE_SHOPPING_ENABLED:true}
+    timeout-seconds: ${RATE_SHOPPING_TIMEOUT:30}
+    max-retries: ${RATE_SHOPPING_RETRIES:3}
+    include-disabled-carriers: false
+    cache-rates: true
+    cache-expiry-minutes: 60
+  
+  # Tracking Settings  
+  tracking:
+    enabled: ${TRACKING_ENABLED:true}
+    update-interval-minutes: ${TRACKING_UPDATE_INTERVAL:60}
+    batch-size: ${TRACKING_BATCH_SIZE:10}
+    timeout-seconds: ${TRACKING_TIMEOUT:30}
+    max-retries: ${TRACKING_RETRIES:3}
+    enable-notifications: ${TRACKING_NOTIFICATIONS:true}
+    enable-scheduled-updates: ${TRACKING_SCHEDULED:true}
+    retention-days: 730 # 2 years
+  
+  # Webhook Settings
+  webhook:
+    enabled: ${WEBHOOK_ENABLED:true}
+    base-url: ${WEBHOOK_BASE_URL:https://api.oceanshoppingcenter.com}
+    webhook-path: /api/webhooks/tracking
+    secret-key: ${WEBHOOK_SECRET:change-me-in-production}
+    timeout-seconds: 30
+    validate-signature: true
+    enable-retry-on-failure: true
+    max-retries: 5
+    
+  # DHL Configuration
+  dhl:
+    enabled: ${DHL_ENABLED:false}
+    sandbox: ${DHL_SANDBOX:true}
+    api-key: ${DHL_API_KEY:}
+    api-secret: ${DHL_API_SECRET:}
+    account-number: ${DHL_ACCOUNT_NUMBER:}
+    base-url: https://api-sandbox.dhl.com
+    production-url: https://api.dhl.com
+    timeout-seconds: 30
+    max-retries: 3
+    rate-limit-per-minute: 100
+    default-service: EXPRESS WORLDWIDE
+    default-currency: USD
+    enable-insurance: true
+    enable-signature: false
+    
+  # FedEx Configuration  
+  fedex:
+    enabled: ${FEDEX_ENABLED:false}
+    sandbox: ${FEDEX_SANDBOX:true}
+    api-key: ${FEDEX_API_KEY:}
+    api-secret: ${FEDEX_API_SECRET:}
+    account-number: ${FEDEX_ACCOUNT_NUMBER:}
+    meter-number: ${FEDEX_METER_NUMBER:}
+    base-url: https://apis-sandbox.fedex.com
+    production-url: https://apis.fedex.com
+    timeout-seconds: 30
+    max-retries: 3
+    rate-limit-per-minute: 200
+    default-service: FEDEX_GROUND
+    default-currency: USD
+    enable-insurance: true
+    enable-signature: false
+    enable-saturday-delivery: false
+    
+  # UPS Configuration
+  ups:
+    enabled: ${UPS_ENABLED:false}
+    sandbox: ${UPS_SANDBOX:true}
+    client-id: ${UPS_CLIENT_ID:}
+    client-secret: ${UPS_CLIENT_SECRET:}
+    account-number: ${UPS_ACCOUNT_NUMBER:}
+    access-license-number: ${UPS_ACCESS_LICENSE:}
+    base-url: https://onlinetools.ups.com/sandbox
+    production-url: https://onlinetools.ups.com
+    timeout-seconds: 30
+    max-retries: 3
+    rate-limit-per-minute: 150
+    default-service: UPS_GROUND
+    default-currency: USD
+    enable-insurance: true
+    enable-signature: false
+    enable-saturday-delivery: false
+    shipper-number: ${UPS_SHIPPER_NUMBER:}
+    
+  # USPS Configuration
+  usps:
+    enabled: ${USPS_ENABLED:false}
+    sandbox: ${USPS_SANDBOX:true}
+    user-id: ${USPS_USER_ID:}
+    password: ${USPS_PASSWORD:}
+    api-key: ${USPS_API_KEY:}
+    base-url: https://stg-secure.shippingapis.com
+    production-url: https://secure.shippingapis.com
+    timeout-seconds: 30
+    max-retries: 3
+    rate-limit-per-minute: 100
+    default-service: PRIORITY
+    default-currency: USD
+    enable-insurance: false
+    enable-signature: false
+
+logging:
+  level:
+    com.ocean.shopping: ${LOG_LEVEL:DEBUG}
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
+    org.hibernate.type.descriptor.sql.BasicBinder: WARN
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: ${LOG_FILE:./logs/ocean-shopping.log}
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      total-size-cap: 100MB
+      max-history: 30
+
+---
+spring:
+  config:
+    activate:
+      on-profile: development
+  jpa:
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+  h2:
+    console:
+      enabled: false
+
+ocean:
+  shopping:
+    cors:
+      allowed-origins: "http://localhost:3001,http://localhost:3000,http://127.0.0.1:3001"
+
+---
+spring:
+  config:
+    activate:
+      on-profile: production
+  jpa:
+    properties:
+      hibernate:
+        show_sql: false
+        format_sql: false
+  
+  # Production Security Configuration
+  security:
+    require-ssl: true
+    headers:
+      frame: deny
+      content-type: nosniff
+      xss: "1; mode=block"
+      referrer-policy: strict-origin-when-cross-origin
+    user:
+      name: ${ADMIN_USERNAME:admin}
+      password: ${ADMIN_PASSWORD:admin123!}
+        
+server:
+  servlet:
+    session:
+      cookie:
+        secure: true
+        same-site: strict
+        http-only: true
+  
+  # Production SSL Configuration
+  forward-headers-strategy: framework
+  use-forward-headers: true
+  
+  # Security headers via Spring Boot
+  compression:
+    enabled: true
+    
+  # Tomcat specific security settings
+  tomcat:
+    max-threads: 200
+    max-connections: 8192
+    connection-timeout: 20000
+    remoteip:
+      remote-ip-header: x-forwarded-for
+      protocol-header: x-forwarded-proto
+      port-header: x-forwarded-port
+      protocol-header-https-value: https
+        
+logging:
+  level:
+    com.ocean.shopping: INFO
+    root: WARN
+    org.springframework.security: INFO
+    org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
+
+# Production Security Settings
+ocean:
+  shopping:
+    cors:
+      allowed-origins: "${PRODUCTION_FRONTEND_URL:https://oceanshoppingcenter.com,https://www.oceanshoppingcenter.com}"
+    security:
+      jwt:
+        # Use stronger JWT settings in production
+        expiration: ${JWT_EXPIRES_IN:3600000} # 1 hour in production
+        refresh-expiration: 604800000 # 7 days for refresh token
+      password:
+        min-length: 12
+        require-special-chars: true
+        require-numbers: true
+        require-uppercase: true
+        require-lowercase: true
+        max-attempts: 3
+        lockout-duration: 900000 # 15 minutes
+      rate-limiting:
+        enabled: true
+        requests-per-minute: 60
+        burst-capacity: 100
+      session:
+        timeout: 1800 # 30 minutes
+        max-concurrent: 1
+        invalid-session-url: /api/auth/session-expired
+      audit:
+        enabled: true
+        log-all-requests: true
+        log-authentication-events: true
+        log-authorization-failures: true
