@@ -1,15 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import {
-  Bars3Icon,
-  MagnifyingGlassIcon,
-  ShoppingCartIcon,
-  UserIcon,
-  ChevronDownIcon,
-} from '@heroicons/react/24/outline';
 import { useAuth } from '../../contexts/AuthContext';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
+import ThemedIcon from '../ui/ThemedIcon';
 
 interface HeaderProps {
   onMobileMenuToggle?: () => void;
@@ -65,7 +59,7 @@ const Header: React.FC<HeaderProps> = ({ onMobileMenuToggle }) => {
                 className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-ocean-500 lg:hidden"
                 aria-label="Open menu"
               >
-                <Bars3Icon className="h-6 w-6" />
+                <ThemedIcon name="menu" size="lg" color="current" />
               </button>
             )}
             
@@ -90,7 +84,7 @@ const Header: React.FC<HeaderProps> = ({ onMobileMenuToggle }) => {
                   placeholder="Search products..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  leftIcon={<MagnifyingGlassIcon className="h-5 w-5" />}
+                  leftIcon={<ThemedIcon name="search" size="md" semantic="muted" />}
                   className="w-full"
                 />
               </form>
@@ -106,7 +100,7 @@ const Header: React.FC<HeaderProps> = ({ onMobileMenuToggle }) => {
                 className="relative p-2 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-ocean-500 rounded-md"
                 aria-label="Shopping cart"
               >
-                <ShoppingCartIcon className="h-6 w-6" />
+                <ThemedIcon name="shopping-cart" size="lg" color="current" />
                 {/* Cart badge - you can connect this to a cart context */}
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                   0
@@ -129,13 +123,13 @@ const Header: React.FC<HeaderProps> = ({ onMobileMenuToggle }) => {
                         className="w-8 h-8 rounded-full object-cover"
                       />
                     ) : (
-                      <UserIcon className="h-5 w-5 text-white" />
+                      <ThemedIcon name="user" size="md" color="white" />
                     )}
                   </div>
                   <span className="hidden md:block text-sm font-medium">
                     {user?.name}
                   </span>
-                  <ChevronDownIcon className="h-4 w-4" />
+                  <ThemedIcon name="chevron-down" size="sm" />
                 </button>
 
                 {/* Dropdown menu */}

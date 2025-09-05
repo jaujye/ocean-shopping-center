@@ -1,26 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import {
-  MagnifyingGlassIcon,
-  FunnelIcon,
-  Squares2X2Icon,
-  ListBulletIcon,
-  EllipsisVerticalIcon,
-  PencilIcon,
-  TrashIcon,
-  DocumentDuplicateIcon,
-  EyeIcon,
-  EyeSlashIcon,
-  CheckIcon,
-  XMarkIcon,
-  ChevronUpIcon,
-  ChevronDownIcon,
-} from '@heroicons/react/24/outline';
 import { cn } from '../../utils/cn';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import Card, { CardContent } from '../ui/Card';
 import Modal from '../ui/Modal';
 import LoadingSpinner from '../ui/LoadingSpinner';
+import ThemedIcon from '../ui/ThemedIcon';
 import { Product } from '../../types';
 import {
   ProductFilters,
@@ -188,8 +173,8 @@ const ProductList: React.FC<ProductListProps> = ({
                 e.stopPropagation();
                 setActiveProductMenu(activeProductMenu === product.id ? null : product.id);
               }}
+              leftIcon="more"
             >
-              <EllipsisVerticalIcon className="h-4 w-4" />
             </Button>
             
             {activeProductMenu === product.id && (
@@ -204,7 +189,7 @@ const ProductList: React.FC<ProductListProps> = ({
                         setActiveProductMenu(null);
                       }}
                     >
-                      <EyeIcon className="h-4 w-4 mr-2" />
+                      <ThemedIcon name="eye" size="sm" className="mr-2" />
                       View Details
                     </button>
                   )}
@@ -216,7 +201,7 @@ const ProductList: React.FC<ProductListProps> = ({
                       setActiveProductMenu(null);
                     }}
                   >
-                    <PencilIcon className="h-4 w-4 mr-2" />
+                    <ThemedIcon name="edit" size="sm" className="mr-2" />
                     Edit
                   </button>
                   <button
@@ -227,7 +212,7 @@ const ProductList: React.FC<ProductListProps> = ({
                       setActiveProductMenu(null);
                     }}
                   >
-                    <DocumentDuplicateIcon className="h-4 w-4 mr-2" />
+                    <ThemedIcon name="duplicate" size="sm" className="mr-2" />
                     Duplicate
                   </button>
                   <button
@@ -238,7 +223,7 @@ const ProductList: React.FC<ProductListProps> = ({
                       setActiveProductMenu(null);
                     }}
                   >
-                    <TrashIcon className="h-4 w-4 mr-2" />
+                    <ThemedIcon name="delete" size="sm" className="mr-2" semantic="error" />
                     Delete
                   </button>
                 </div>
@@ -268,9 +253,9 @@ const ProductList: React.FC<ProductListProps> = ({
             <h3 className="font-medium text-gray-900 truncate">{product.name}</h3>
             <div className="flex items-center space-x-1">
               {product.isActive ? (
-                <EyeIcon className="h-4 w-4 text-green-500" title="Active" />
+                <ThemedIcon name="eye" size="sm" color="green" title="Active" />
               ) : (
-                <EyeSlashIcon className="h-4 w-4 text-gray-400" title="Inactive" />
+                <ThemedIcon name="eye-slash" size="sm" color="gray" title="Inactive" />
               )}
             </div>
           </div>
@@ -369,7 +354,7 @@ const ProductList: React.FC<ProductListProps> = ({
                 onProductView(product);
               }}
             >
-              <EyeIcon className="h-4 w-4" />
+              <ThemedIcon name="eye" size="sm" />
             </Button>
           )}
           <Button
@@ -380,7 +365,7 @@ const ProductList: React.FC<ProductListProps> = ({
               onProductEdit(product);
             }}
           >
-            <PencilIcon className="h-4 w-4" />
+            <ThemedIcon name="edit" size="sm" />
           </Button>
           <Button
             variant="ghost"
@@ -390,7 +375,7 @@ const ProductList: React.FC<ProductListProps> = ({
               onProductDuplicate(product.id);
             }}
           >
-            <DocumentDuplicateIcon className="h-4 w-4" />
+            <ThemedIcon name="duplicate" size="sm" />
           </Button>
           <Button
             variant="ghost"
@@ -401,7 +386,7 @@ const ProductList: React.FC<ProductListProps> = ({
             }}
             className="text-red-600 hover:text-red-700 hover:bg-red-50"
           >
-            <TrashIcon className="h-4 w-4" />
+            <ThemedIcon name="delete" size="sm" semantic="error" />
           </Button>
         </div>
       </td>
@@ -417,7 +402,7 @@ const ProductList: React.FC<ProductListProps> = ({
             placeholder="Search products..."
             value={searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
-            leftIcon={<MagnifyingGlassIcon className="h-4 w-4" />}
+            leftIcon={<ThemedIcon name="search" size="sm" semantic="muted" />}
           />
         </div>
         
@@ -425,7 +410,7 @@ const ProductList: React.FC<ProductListProps> = ({
           <Button
             variant="outline"
             onClick={() => setShowFilters(!showFilters)}
-            leftIcon={<FunnelIcon className="h-4 w-4" />}
+            leftIcon="filter"
           >
             Filters
           </Button>
@@ -436,16 +421,16 @@ const ProductList: React.FC<ProductListProps> = ({
               size="sm"
               onClick={() => setViewMode('grid')}
               className="rounded-r-none border-r-0"
+              leftIcon="grid"
             >
-              <Squares2X2Icon className="h-4 w-4" />
             </Button>
             <Button
               variant={viewMode === 'list' ? 'primary' : 'ghost'}
               size="sm"
               onClick={() => setViewMode('list')}
               className="rounded-l-none"
+              leftIcon="list"
             >
-              <ListBulletIcon className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -525,8 +510,7 @@ const ProductList: React.FC<ProductListProps> = ({
                 <span className="text-sm text-gray-600">
                   {selectedProducts.length} product{selectedProducts.length > 1 ? 's' : ''} selected
                 </span>
-                <Button variant="ghost" size="sm" onClick={onClearSelection}>
-                  <XMarkIcon className="h-4 w-4 mr-1" />
+                <Button variant="ghost" size="sm" onClick={onClearSelection} leftIcon="close">
                   Clear
                 </Button>
               </div>
@@ -567,7 +551,7 @@ const ProductList: React.FC<ProductListProps> = ({
       ) : products.length === 0 ? (
         <div className="text-center py-12">
           <div className="text-gray-400 mb-4">
-            <Squares2X2Icon className="h-12 w-12 mx-auto" />
+            <ThemedIcon name="grid" size="3xl" color="gray" className="mx-auto" />
           </div>
           <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
           <p className="text-gray-500 mb-4">
@@ -604,8 +588,8 @@ const ProductList: React.FC<ProductListProps> = ({
                     <span>Product</span>
                     {sortField === 'name' && (
                       sortOrder === 'asc' ? 
-                      <ChevronUpIcon className="h-4 w-4" /> : 
-                      <ChevronDownIcon className="h-4 w-4" />
+                      <ThemedIcon name="chevron-up" size="sm" /> : 
+                      <ThemedIcon name="chevron-down" size="sm" />
                     )}
                   </div>
                 </th>
@@ -617,8 +601,8 @@ const ProductList: React.FC<ProductListProps> = ({
                     <span>Price</span>
                     {sortField === 'price' && (
                       sortOrder === 'asc' ? 
-                      <ChevronUpIcon className="h-4 w-4" /> : 
-                      <ChevronDownIcon className="h-4 w-4" />
+                      <ThemedIcon name="chevron-up" size="sm" /> : 
+                      <ThemedIcon name="chevron-down" size="sm" />
                     )}
                   </div>
                 </th>
@@ -630,8 +614,8 @@ const ProductList: React.FC<ProductListProps> = ({
                     <span>Stock</span>
                     {sortField === 'stockQuantity' && (
                       sortOrder === 'asc' ? 
-                      <ChevronUpIcon className="h-4 w-4" /> : 
-                      <ChevronDownIcon className="h-4 w-4" />
+                      <ThemedIcon name="chevron-up" size="sm" /> : 
+                      <ThemedIcon name="chevron-down" size="sm" />
                     )}
                   </div>
                 </th>
@@ -643,8 +627,8 @@ const ProductList: React.FC<ProductListProps> = ({
                     <span>Rating</span>
                     {sortField === 'rating' && (
                       sortOrder === 'asc' ? 
-                      <ChevronUpIcon className="h-4 w-4" /> : 
-                      <ChevronDownIcon className="h-4 w-4" />
+                      <ThemedIcon name="chevron-up" size="sm" /> : 
+                      <ThemedIcon name="chevron-down" size="sm" />
                     )}
                   </div>
                 </th>

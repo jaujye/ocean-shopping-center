@@ -1,14 +1,16 @@
 import React, { ButtonHTMLAttributes, ReactNode } from 'react';
 import { cn } from '../../utils/cn';
 import LoadingSpinner from './LoadingSpinner';
+import { IconName } from './Icon';
+import ThemedIcon from './ThemedIcon';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
   size?: 'sm' | 'md' | 'lg' | 'xl';
   loading?: boolean;
   loadingText?: string;
-  leftIcon?: ReactNode;
-  rightIcon?: ReactNode;
+  leftIcon?: ReactNode | IconName;
+  rightIcon?: ReactNode | IconName;
   fullWidth?: boolean;
   asChild?: boolean;
   children: ReactNode;
@@ -46,6 +48,28 @@ const Button: React.FC<ButtonProps> = ({
   };
 
   const isDisabled = disabled || loading;
+
+  // Helper to render icons consistently
+  const renderIcon = (icon: ReactNode | IconName | undefined, position: 'left' | 'right') => {
+    if (!icon) return null;
+    
+    if (typeof icon === 'string') {
+      // It's an IconName, render with ThemedIcon
+      const iconSize = size === 'sm' ? 'sm' : size === 'lg' || size === 'xl' ? 'md' : 'sm';
+      const iconColor = variant === 'primary' || variant === 'secondary' || variant === 'danger' ? 'white' : 'current';
+      
+      return (
+        <ThemedIcon
+          name={icon}
+          size={iconSize}
+          color={iconColor}
+        />
+      );
+    }
+    
+    // It's a ReactNode, render as-is
+    return icon;
+  };
 
   const buttonClasses = cn(
     baseClasses,
@@ -85,7 +109,7 @@ const Button: React.FC<ButtonProps> = ({
       <div className={cn('flex items-center', loading && 'invisible')}>
         {leftIcon && (
           <span className="mr-2 flex-shrink-0">
-            {leftIcon}
+            {renderIcon(leftIcon, 'left')}
           </span>
         )}
         
@@ -93,7 +117,7 @@ const Button: React.FC<ButtonProps> = ({
         
         {rightIcon && (
           <span className="ml-2 flex-shrink-0">
-            {rightIcon}
+            {renderIcon(rightIcon, 'right')}
           </span>
         )}
       </div>
