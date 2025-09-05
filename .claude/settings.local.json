@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Read(/C:\\Users\\JauJyeCH\\Desktop\\ocean_shopping_center\\.claude\\rules/**)"
+      "Read(/C:\\Users\\JauJyeCH\\Desktop\\ocean_shopping_center\\.claude\\rules/**)",
+      "Bash(git merge:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []
