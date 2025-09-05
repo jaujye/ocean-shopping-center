@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import CouponInput from '../coupons/CouponInput';
+import { CouponValidationResponse } from '../../services/couponService';
 
 interface CartItem {
   id: number;
@@ -30,7 +32,13 @@ interface OrderSummaryProps {
   onCouponCodeChange?: (code: string) => void;
   onApplyCoupon?: () => void;
   onRemoveCoupon?: () => void;
+  appliedCoupon?: CouponValidationResponse | null;
+  onCouponApplied?: (coupon: CouponValidationResponse) => void;
+  onCouponRemoved?: () => void;
+  storeId?: number;
+  customerEmail?: string;
   className?: string;
+  showAdvancedCouponInput?: boolean;
 }
 
 const OrderSummary: React.FC<OrderSummaryProps> = ({
@@ -39,7 +47,13 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
   onCouponCodeChange,
   onApplyCoupon,
   onRemoveCoupon,
-  className = ''
+  appliedCoupon,
+  onCouponApplied,
+  onCouponRemoved,
+  storeId,
+  customerEmail,
+  className = '',
+  showAdvancedCouponInput = false
 }) => {
   const [isExpanded, setIsExpanded] = useState(true);
 
@@ -113,7 +127,19 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
         </div>
 
         {/* Coupon Code */}
-        {(onCouponCodeChange || onApplyCoupon) && (
+        {showAdvancedCouponInput ? (
+          <div className="p-6 border-b border-gray-200">
+            <h4 className="text-sm font-medium text-gray-900 mb-3">Promo Code</h4>
+            <CouponInput
+              orderAmount={subtotal}
+              storeId={storeId}
+              customerEmail={customerEmail}
+              onCouponApplied={onCouponApplied}
+              onCouponRemoved={onCouponRemoved}
+              appliedCoupon={appliedCoupon}
+            />
+          </div>
+        ) : (onCouponCodeChange || onApplyCoupon) && (
           <div className="p-6 border-b border-gray-200">
             <h4 className="text-sm font-medium text-gray-900 mb-3">Promo Code</h4>
             <div className="flex">
