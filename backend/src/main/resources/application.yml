@@ -74,13 +74,35 @@ server:
       cookie:
         name: OCEANSESSIONID
         http-only: true
-        secure: false
-        same-site: lax
+        secure: ${COOKIE_SECURE:false}
+        same-site: ${COOKIE_SAME_SITE:lax}
         max-age: ${SESSION_MAX_AGE:86400}
   compression:
     enabled: true
     mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
     min-response-size: 1024
+  
+  # SSL/HTTPS Configuration
+  ssl:
+    enabled: ${SSL_ENABLED:false}
+    key-store: ${SSL_KEY_STORE:}
+    key-store-password: ${SSL_KEY_STORE_PASSWORD:}
+    key-store-type: ${SSL_KEY_STORE_TYPE:PKCS12}
+    key-alias: ${SSL_KEY_ALIAS:oceanshoppingcenter}
+    ciphers: TLS_AES_256_GCM_SHA384,TLS_CHACHA20_POLY1305_SHA256,TLS_AES_128_GCM_SHA256,ECDHE-RSA-AES256-GCM-SHA384,ECDHE-RSA-AES128-GCM-SHA256
+    enabled-protocols: TLSv1.2,TLSv1.3
+  
+  # Security Configuration
+  forward-headers-strategy: framework
+  use-forward-headers: ${USE_FORWARD_HEADERS:true}
+  
+  # Error handling
+  error:
+    whitelabel:
+      enabled: false
+    include-message: on_param
+    include-binding-errors: on_param
+    include-stacktrace: on_param
     
 management:
   endpoints:
@@ -351,19 +373,81 @@ spring:
       hibernate:
         show_sql: false
         format_sql: false
+  
+  # Production Security Configuration
+  security:
+    require-ssl: true
+    headers:
+      frame: deny
+      content-type: nosniff
+      xss: "1; mode=block"
+      referrer-policy: strict-origin-when-cross-origin
+    user:
+      name: ${ADMIN_USERNAME:admin}
+      password: ${ADMIN_PASSWORD:admin123!}
         
 server:
   servlet:
     session:
       cookie:
         secure: true
+        same-site: strict
+        http-only: true
+  
+  # Production SSL Configuration
+  forward-headers-strategy: framework
+  use-forward-headers: true
+  
+  # Security headers via Spring Boot
+  compression:
+    enabled: true
+    
+  # Tomcat specific security settings
+  tomcat:
+    max-threads: 200
+    max-connections: 8192
+    connection-timeout: 20000
+    remoteip:
+      remote-ip-header: x-forwarded-for
+      protocol-header: x-forwarded-proto
+      port-header: x-forwarded-port
+      protocol-header-https-value: https
         
 logging:
   level:
     com.ocean.shopping: INFO
     root: WARN
+    org.springframework.security: INFO
+    org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
 
+# Production Security Settings
 ocean:
   shopping:
     cors:
-      allowed-origins: "${PRODUCTION_FRONTEND_URL:https://oceanshoppingcenter.com}"
+      allowed-origins: "${PRODUCTION_FRONTEND_URL:https://oceanshoppingcenter.com,https://www.oceanshoppingcenter.com}"
+    security:
+      jwt:
+        # Use stronger JWT settings in production
+        expiration: ${JWT_EXPIRES_IN:3600000} # 1 hour in production
+        refresh-expiration: 604800000 # 7 days for refresh token
+      password:
+        min-length: 12
+        require-special-chars: true
+        require-numbers: true
+        require-uppercase: true
+        require-lowercase: true
+        max-attempts: 3
+        lockout-duration: 900000 # 15 minutes
+      rate-limiting:
+        enabled: true
+        requests-per-minute: 60
+        burst-capacity: 100
+      session:
+        timeout: 1800 # 30 minutes
+        max-concurrent: 1
+        invalid-session-url: /api/auth/session-expired
+      audit:
+        enabled: true
+        log-all-requests: true
+        log-authentication-events: true
+        log-authorization-failures: true
