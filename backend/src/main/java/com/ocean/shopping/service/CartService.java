@@ -6,6 +6,7 @@ import com.ocean.shopping.repository.CartItemRepository;
 import com.ocean.shopping.repository.ProductRepository;
 import com.ocean.shopping.exception.BadRequestException;
 import com.ocean.shopping.exception.ResourceNotFoundException;
+import com.ocean.shopping.service.lock.DistributedLockManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -33,6 +34,7 @@ public class CartService {
     private final ProductRepository productRepository;
     private final UserService userService;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final DistributedLockManager lockManager;
 
     // Constants
     private static final String CART_CACHE_PREFIX = "cart:";
@@ -85,7 +87,7 @@ public class CartService {
     }
 
     /**
-     * Add item to cart
+     * Add item to cart with distributed lock protection
      */
     @Transactional
     public Cart addItemToCart(UUID userId, String sessionId, UUID productId, Integer quantity, 
@@ -97,6 +99,25 @@ public class CartService {
             throw new BadRequestException("Quantity must be at least 1");
         }
 
+        // Use distributed locks to prevent race conditions
+        String userIdentifier = userId != null ? userId.toString() : sessionId;
+        String cartLockKey = lockManager.cartLockKey(userIdentifier);
+        String inventoryLockKey = lockManager.inventoryLockKey(productId.toString());
+        
+        // Execute cart operation with distributed lock protection
+        return lockManager.executeWithLockOrThrow(cartLockKey, () -> {
+            return lockManager.executeWithLockOrThrow(inventoryLockKey, () -> {
+                return addItemToCartInternal(userId, sessionId, productId, quantity, productVariantId, selectedOptions);
+            });
+        });
+    }
+
+    /**
+     * Internal method for adding item to cart (protected by locks)
+     */
+    private Cart addItemToCartInternal(UUID userId, String sessionId, UUID productId, Integer quantity, 
+                                      UUID productVariantId, Map<String, String> selectedOptions) {
+        
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> ResourceNotFoundException.forEntity("Product", productId));
 
@@ -104,7 +125,7 @@ public class CartService {
             throw new BadRequestException("Product is not active");
         }
 
-        // Check inventory
+        // Check inventory with fresh data (within lock)
         if (product.getTrackInventory() && quantity > product.getInventoryQuantity()) {
             throw new BadRequestException("Insufficient inventory. Available: " + product.getInventoryQuantity());
         }
@@ -119,6 +140,7 @@ public class CartService {
             CartItem item = existingItem.get();
             int newQuantity = item.getQuantity() + quantity;
             
+            // Re-check inventory with new total quantity
             if (product.getTrackInventory() && newQuantity > product.getInventoryQuantity()) {
                 throw new BadRequestException("Total quantity exceeds available inventory");
             }
@@ -143,7 +165,7 @@ public class CartService {
     }
 
     /**
-     * Update cart item quantity
+     * Update cart item quantity with distributed lock protection
      */
     @Transactional
     public Cart updateCartItemQuantity(UUID userId, String sessionId, UUID itemId, Integer quantity) {
@@ -154,6 +176,26 @@ public class CartService {
             throw new BadRequestException("Quantity must be at least 1");
         }
 
+        // First get the cart item to determine locks needed
+        CartItem cartItem = cartItemRepository.findById(itemId)
+                .orElseThrow(() -> ResourceNotFoundException.forEntity("CartItem", itemId));
+
+        String userIdentifier = userId != null ? userId.toString() : sessionId;
+        String cartLockKey = lockManager.cartLockKey(userIdentifier);
+        String inventoryLockKey = lockManager.inventoryLockKey(cartItem.getProduct().getId().toString());
+        
+        // Execute update with distributed lock protection
+        return lockManager.executeWithLockOrThrow(cartLockKey, () -> {
+            return lockManager.executeWithLockOrThrow(inventoryLockKey, () -> {
+                return updateCartItemQuantityInternal(userId, sessionId, itemId, quantity);
+            });
+        });
+    }
+
+    /**
+     * Internal method for updating cart item quantity (protected by locks)
+     */
+    private Cart updateCartItemQuantityInternal(UUID userId, String sessionId, UUID itemId, Integer quantity) {
         CartItem cartItem = cartItemRepository.findById(itemId)
                 .orElseThrow(() -> ResourceNotFoundException.forEntity("CartItem", itemId));
 
@@ -164,7 +206,7 @@ public class CartService {
             throw new BadRequestException("Cart item does not belong to user or session");
         }
 
-        // Check inventory
+        // Check inventory with fresh data (within lock)
         Product product = cartItem.getProduct();
         if (product.getTrackInventory() && quantity > product.getInventoryQuantity()) {
             throw new BadRequestException("Insufficient inventory. Available: " + product.getInventoryQuantity());
@@ -184,12 +226,25 @@ public class CartService {
     }
 
     /**
-     * Remove item from cart
+     * Remove item from cart with distributed lock protection
      */
     @Transactional
     public Cart removeCartItem(UUID userId, String sessionId, UUID itemId) {
         log.debug("Removing cart item - User: {}, Session: {}, Item: {}", userId, sessionId, itemId);
 
+        String userIdentifier = userId != null ? userId.toString() : sessionId;
+        String cartLockKey = lockManager.cartLockKey(userIdentifier);
+        
+        // Execute removal with distributed lock protection
+        return lockManager.executeWithLockOrThrow(cartLockKey, () -> {
+            return removeCartItemInternal(userId, sessionId, itemId);
+        });
+    }
+
+    /**
+     * Internal method for removing cart item (protected by locks)
+     */
+    private Cart removeCartItemInternal(UUID userId, String sessionId, UUID itemId) {
         CartItem cartItem = cartItemRepository.findById(itemId)
                 .orElseThrow(() -> ResourceNotFoundException.forEntity("CartItem", itemId));
 

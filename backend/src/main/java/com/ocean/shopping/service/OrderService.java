@@ -8,6 +8,7 @@ import com.ocean.shopping.dto.order.*;
 import com.ocean.shopping.repository.OrderRepository;
 import com.ocean.shopping.repository.StoreRepository;
 import com.ocean.shopping.service.payment.PaymentProviderService;
+import com.ocean.shopping.service.lock.DistributedLockManager;
 import com.ocean.shopping.exception.BadRequestException;
 import com.ocean.shopping.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -39,30 +41,90 @@ public class OrderService {
     private final UserService userService;
     private final NotificationService notificationService;
     private final ShippingService shippingService;
+    private final DistributedLockManager lockManager;
     
     // Order number generation prefix
     private static final String ORDER_NUMBER_PREFIX = "OSC";
 
     /**
-     * Process checkout and create order
+     * Process checkout and create order with distributed lock protection
      */
     @Transactional
     public CheckoutResponse processCheckout(CheckoutRequest request, UUID userId, String sessionId) {
-        try {
-            log.info("Processing checkout for user: {} or session: {}", userId, sessionId);
+        log.info("Processing checkout for user: {} or session: {}", userId, sessionId);
 
+        String userIdentifier = userId != null ? userId.toString() : sessionId;
+        String cartLockKey = lockManager.cartLockKey(userIdentifier);
+        
+        // Execute checkout with distributed lock protection
+        return lockManager.executeWithLockOrThrow(cartLockKey, () -> {
+            return processCheckoutInternal(request, userId, sessionId);
+        });
+    }
+
+    /**
+     * Internal checkout processing method (protected by locks)
+     */
+    private CheckoutResponse processCheckoutInternal(CheckoutRequest request, UUID userId, String sessionId) {
+        try {
             // Get cart
             Cart cart = getCartForCheckout(userId, sessionId);
             if (cart == null || cart.getCartItems().isEmpty()) {
                 throw new BadRequestException("Cart is empty");
             }
 
-            // Validate cart items and update prices
-            validateAndUpdateCart(cart);
+            // Collect all inventory locks needed for this order
+            List<String> inventoryLockKeys = cart.getCartItems().stream()
+                    .map(item -> lockManager.inventoryLockKey(item.getProduct().getId().toString()))
+                    .collect(Collectors.toList());
 
-            // Create order from cart
-            Order order = createOrderFromCart(cart, request);
+            // Execute with multiple inventory locks
+            return executeWithInventoryLocks(inventoryLockKeys, () -> {
+                // Validate cart items and update prices (within inventory locks)
+                validateAndUpdateCart(cart);
 
+                // Create order from cart
+                Order order = createOrderFromCart(cart, request);
+
+                // Process payment with lock protection
+                return processPaymentAndFinalizeOrder(order, request, userId, sessionId, cart);
+            });
+
+        } catch (Exception e) {
+            log.error("Error processing checkout for user: {} or session: {}", userId, sessionId, e);
+            throw e;
+        }
+    }
+
+    /**
+     * Execute operation with multiple inventory locks
+     */
+    private CheckoutResponse executeWithInventoryLocks(List<String> lockKeys, Callable<CheckoutResponse> operation) {
+        if (lockKeys.isEmpty()) {
+            try {
+                return operation.call();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        String firstLock = lockKeys.get(0);
+        List<String> remainingLocks = lockKeys.subList(1, lockKeys.size());
+
+        return lockManager.executeWithLockOrThrow(firstLock, () -> {
+            return executeWithInventoryLocks(remainingLocks, operation);
+        });
+    }
+
+    /**
+     * Process payment and finalize order
+     */
+    private CheckoutResponse processPaymentAndFinalizeOrder(Order order, CheckoutRequest request, 
+                                                           UUID userId, String sessionId, Cart cart) {
+        // Generate unique payment lock key for this order
+        String paymentLockKey = lockManager.paymentLockKey(order.getId().toString());
+        
+        return lockManager.executeWithLockOrThrow(paymentLockKey, () -> {
             // Process payment
             PaymentProviderService.PaymentIntent paymentIntent = 
                 paymentService.createPaymentIntent(order, PaymentProvider.STRIPE);

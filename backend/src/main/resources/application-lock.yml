@@ -1,0 +1,58 @@
+# Distributed Lock Configuration
+app:
+  lock:
+    enabled: true
+    default-ttl-seconds: 30
+    max-retries: 5
+    retry-base-delay-ms: 100
+    retry-max-delay-ms: 2000
+    cleanup:
+      enabled: true
+      orphaned-threshold-minutes: 5
+      max-locks-per-cleanup: 100
+
+# Redis Configuration for High Availability
+spring:
+  data:
+    redis:
+      # Standalone configuration (development)
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      
+      # High Availability Sentinel configuration (production)
+      sentinel:
+        master: ${REDIS_SENTINEL_MASTER:}
+        nodes: ${REDIS_SENTINEL_NODES:}
+      
+      # SSL/TLS Configuration
+      ssl:
+        enabled: ${REDIS_SSL_ENABLED:false}
+      
+      # Connection Pool Configuration
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+
+# Actuator endpoints for monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,info,locks
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+# Logging configuration for lock system
+logging:
+  level:
+    com.ocean.shopping.service.lock: DEBUG
+    org.springframework.data.redis: INFO
