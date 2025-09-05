@@ -89,25 +89,54 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      args:
+        - MAVEN_OPTS=-Xmx1024m
+    image: ocean-shopping-center/backend:latest
     container_name: ocean_backend
     restart: unless-stopped
     environment:
+      # Spring Configuration
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-ocean_shopping_center}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      
+      # Redis Configuration
       SPRING_REDIS_HOST: redis
       SPRING_REDIS_PORT: 6379
       SPRING_REDIS_DATABASE: ${REDIS_DATABASE:-0}
+      SPRING_REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      
+      # JPA Configuration
       SPRING_JPA_HIBERNATE_DDL_AUTO: ${JPA_DDL_AUTO:-validate}
-      SERVER_PORT: ${BACKEND_PORT:-8080}
+      SPRING_JPA_SHOW_SQL: ${SPRING_JPA_SHOW_SQL:-false}
+      
+      # Server Configuration
+      SERVER_PORT: 8080
+      
+      # Security Configuration
       JWT_SECRET: ${JWT_SECRET:-ocean_shopping_center_jwt_secret_key_2025}
       JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://frontend:3000}
+      
+      # CORS Configuration
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3001,http://frontend}
+      
+      # Payment Configuration
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_test_default}
+      STRIPE_PUBLIC_KEY: ${STRIPE_PUBLIC_KEY:-pk_test_default}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-whsec_default}
+      
+      # Performance Configuration
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: ${DB_POOL_SIZE:-20}
+      SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: ${DB_POOL_MIN_IDLE:-5}
+      
+      # Java Heap Configuration
+      JAVA_OPTS: ${JAVA_OPTS:--XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0}
     ports:
       - "${BACKEND_PORT:-8080}:8080"
     volumes:
       - ./backend/logs:/app/logs
+      - ./backend/uploads:/app/uploads
     networks:
       - ocean_network
     depends_on:
@@ -123,28 +152,54 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 1G
+          cpus: '0.5'
 
-  # Application Frontend (placeholder for future implementation)
+  # Application Frontend - React with Nginx
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        - NODE_ENV=${NODE_ENV:-production}
+        - REACT_APP_API_URL=${REACT_APP_API_URL:-http://localhost:8080}
+    image: ocean-shopping-center/frontend:latest
     container_name: ocean_frontend
     restart: unless-stopped
     environment:
-      NODE_ENV: ${NODE_ENV:-development}
-      REACT_APP_API_URL: ${REACT_APP_API_URL:-http://localhost:3000}
+      NODE_ENV: ${NODE_ENV:-production}
+      REACT_APP_API_URL: ${REACT_APP_API_URL:-http://localhost:8080}
+      REACT_APP_WS_URL: ${REACT_APP_WS_URL:-ws://localhost:8080}
+      REACT_APP_STRIPE_PUBLIC_KEY: ${STRIPE_PUBLIC_KEY:-pk_test_default}
     ports:
-      - "${FRONTEND_PORT:-3001}:3000"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
+      - "${FRONTEND_PORT:-3001}:80"
     networks:
       - ocean_network
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     profiles:
       - app
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
 
 volumes:
   postgres_data:
