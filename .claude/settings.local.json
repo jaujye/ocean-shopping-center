@@ -23,7 +23,14 @@
       "mcp__context7__get-library-docs",
       "mcp__postgres__get_object_details",
       "mcp__postgres__analyze_db_health",
-      "mcp__graphiti_ocean-shopping-center__get_episodes"
+      "mcp__graphiti_ocean-shopping-center__get_episodes",
+      "Bash(gh issue list:*)",
+      "Bash(gh issue close:*)",
+      "Bash(git branch:*)",
+      "Bash(git worktree:*)",
+      "Bash(git remote remove:*)",
+      "Bash(git remote:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": [],
     "ask": []

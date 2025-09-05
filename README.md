@@ -302,12 +302,34 @@ docker-compose -f docker-compose.prod.yml up -d
 2. 搜尋 [Issues](../../issues)
 3. 建立新的 [Issue](../../issues/new)
 
-## 🔗 相關連結
+## 📚 完整文檔
 
-- [API 文檔](http://localhost:8080/swagger-ui.html)
-- [部署指南](DEPLOYMENT.md)
-- [命令參考](COMMANDS.md)
-- [代理系統](AGENTS.md)
+### 🏗️ 系統架構文檔
+- [**系統架構設計**](documentation/architecture/system-architecture.md) - 完整系統架構、技術棧和高級設計
+- [**前端架構設計**](documentation/architecture/frontend-architecture.md) - React 前端架構、組件設計和狀態管理
+- [**後端架構設計**](documentation/architecture/backend-architecture.md) - Spring Boot 後端架構、分層設計和 API 設計
+- [**資料庫設計**](documentation/architecture/database-design.md) - PostgreSQL 資料庫設計、ERD 和索引優化
+
+### 🚀 部署與運維文檔
+- [**開發環境設置**](documentation/deployment/development-setup.md) - 本地開發環境完整設置指南
+- [**生產環境部署**](documentation/deployment/production-deployment.md) - 生產環境部署、藍綠部署和維護指南
+- [**DevOps 流水線**](documentation/deployment/devops-pipeline.md) - CI/CD 流水線、自動化測試和部署流程
+
+### 📡 API 與監控文檔
+- [**API 文檔**](documentation/api/api-documentation.md) - 完整的 REST API 文檔、認證和錯誤處理
+- [**監控告警系統**](documentation/monitoring/monitoring-alerting.md) - Prometheus、Grafana 監控和告警配置
+
+### 🔗 快速連結
+
+#### 開發環境
+- [API 文檔](http://localhost:8080/swagger-ui.html) - Swagger UI 介面
+- [pgAdmin](http://localhost:8080) - 資料庫管理 (開發模式)
+- [Redis Commander](http://localhost:8081) - Redis 管理 (開發模式)
+
+#### 其他資源  
+- [部署指南](DEPLOYMENT.md) - 基本部署說明
+- [命令參考](COMMANDS.md) - 常用命令參考
+- [代理系統](AGENTS.md) - Claude Code 代理設置
 
 ---
 
