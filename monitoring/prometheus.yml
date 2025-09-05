@@ -7,11 +7,11 @@ global:
 alerting:
   alertmanagers:
     - static_configs:
-        - targets: []
+        - targets: ['alertmanager:9093']
 
 # Load rules once and periodically evaluate them
 rule_files:
-  - "rules/*.yml"
+  - "/etc/prometheus/rules/*.yml"
 
 # Scrape configurations
 scrape_configs:
@@ -34,31 +34,41 @@ scrape_configs:
       - target_label: __address__
         replacement: backend:8080
 
-  # PostgreSQL Database Metrics
+  # PostgreSQL Database Metrics via Exporter
   - job_name: 'postgres'
     static_configs:
-      - targets: ['postgres:5432']
-    metrics_path: '/metrics'
+      - targets: ['postgres-exporter:9187']
     scrape_interval: 30s
+    relabel_configs:
+      - target_label: service
+        replacement: database
 
-  # Redis Metrics
+  # Redis Metrics via Exporter  
   - job_name: 'redis'
     static_configs:
-      - targets: ['redis-master:6379']
-    metrics_path: '/metrics'
+      - targets: ['redis-exporter:9121']
     scrape_interval: 30s
+    relabel_configs:
+      - target_label: service
+        replacement: cache
 
-  # Nginx Metrics (if nginx-prometheus-exporter is configured)
+  # Nginx Metrics via Exporter
   - job_name: 'nginx'
     static_configs:
-      - targets: ['nginx-proxy:9113']
+      - targets: ['nginx-exporter:9113']
     scrape_interval: 15s
+    relabel_configs:
+      - target_label: service
+        replacement: loadbalancer
 
   # Node Exporter for system metrics
   - job_name: 'node-exporter'
     static_configs:
       - targets: ['node-exporter:9100']
     scrape_interval: 15s
+    relabel_configs:
+      - target_label: service
+        replacement: system
 
   # Application Custom Metrics
   - job_name: 'ocean-app-metrics'
@@ -110,6 +120,25 @@ scrape_configs:
       - source_labels: [__name__]
         regex: 'websocket_.*|stomp_.*|session_.*'
         action: keep
+
+  # Jaeger Tracing Metrics
+  - job_name: 'jaeger'
+    static_configs:
+      - targets: ['jaeger:14269']
+    scrape_interval: 30s
+    metrics_path: '/metrics'
+    relabel_configs:
+      - target_label: service
+        replacement: tracing
+
+  # AlertManager Metrics
+  - job_name: 'alertmanager'
+    static_configs:
+      - targets: ['alertmanager:9093']
+    scrape_interval: 30s
+    relabel_configs:
+      - target_label: service
+        replacement: alerting
 
 # Remote write configuration for long-term storage (optional)
 # remote_write:

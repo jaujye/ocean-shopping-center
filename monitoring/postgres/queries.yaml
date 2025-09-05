@@ -1,0 +1,190 @@
+pg_database:
+  query: |
+    SELECT 
+      pg_database.datname as datname,
+      pg_database_size(pg_database.datname) as size_bytes,
+      pg_stat_get_db_numbackends(pg_database.oid) as numbackends,
+      pg_stat_get_db_xact_commit(pg_database.oid) as xact_commit,
+      pg_stat_get_db_xact_rollback(pg_database.oid) as xact_rollback,
+      pg_stat_get_db_blocks_fetched(pg_database.oid) as blocks_fetched,
+      pg_stat_get_db_blocks_hit(pg_database.oid) as blocks_hit,
+      pg_stat_get_db_tup_returned(pg_database.oid) as tup_returned,
+      pg_stat_get_db_tup_fetched(pg_database.oid) as tup_fetched,
+      pg_stat_get_db_tup_inserted(pg_database.oid) as tup_inserted,
+      pg_stat_get_db_tup_updated(pg_database.oid) as tup_updated,
+      pg_stat_get_db_tup_deleted(pg_database.oid) as tup_deleted
+    FROM pg_database 
+    WHERE datistemplate = false
+  master: true
+  metrics:
+    - datname:
+        usage: "LABEL"
+        description: "Database name"
+    - size_bytes:
+        usage: "GAUGE"
+        description: "Database size in bytes"
+    - numbackends:
+        usage: "GAUGE"
+        description: "Number of backends currently connected to this database"
+    - xact_commit:
+        usage: "COUNTER"
+        description: "Number of transactions committed"
+    - xact_rollback:
+        usage: "COUNTER"
+        description: "Number of transactions rolled back"
+    - blocks_fetched:
+        usage: "COUNTER"
+        description: "Number of disk blocks fetched"
+    - blocks_hit:
+        usage: "COUNTER"
+        description: "Number of buffer hits"
+    - tup_returned:
+        usage: "COUNTER"
+        description: "Number of rows returned by queries"
+    - tup_fetched:
+        usage: "COUNTER"
+        description: "Number of rows fetched by queries"
+    - tup_inserted:
+        usage: "COUNTER"
+        description: "Number of rows inserted"
+    - tup_updated:
+        usage: "COUNTER"
+        description: "Number of rows updated"
+    - tup_deleted:
+        usage: "COUNTER"
+        description: "Number of rows deleted"
+
+pg_stat_activity:
+  query: |
+    SELECT
+      count(*) as total_connections,
+      count(*) FILTER (WHERE state = 'active') as active_connections,
+      count(*) FILTER (WHERE state = 'idle') as idle_connections,
+      count(*) FILTER (WHERE state = 'idle in transaction') as idle_in_transaction,
+      count(*) FILTER (WHERE state = 'idle in transaction (aborted)') as idle_in_transaction_aborted,
+      COALESCE(max(EXTRACT(EPOCH FROM (now() - query_start))), 0) as max_tx_duration_seconds,
+      COALESCE(max(EXTRACT(EPOCH FROM (now() - state_change))), 0) as max_connection_age_seconds
+    FROM pg_stat_activity
+    WHERE backend_type = 'client backend'
+  master: true
+  metrics:
+    - total_connections:
+        usage: "GAUGE"
+        description: "Total number of connections"
+    - active_connections:
+        usage: "GAUGE"
+        description: "Number of active connections"
+    - idle_connections:
+        usage: "GAUGE"
+        description: "Number of idle connections"
+    - idle_in_transaction:
+        usage: "GAUGE"
+        description: "Number of idle in transaction connections"
+    - idle_in_transaction_aborted:
+        usage: "GAUGE"
+        description: "Number of idle in transaction aborted connections"
+    - max_tx_duration_seconds:
+        usage: "GAUGE"
+        description: "Maximum transaction duration in seconds"
+    - max_connection_age_seconds:
+        usage: "GAUGE"
+        description: "Maximum connection age in seconds"
+
+pg_stat_statements:
+  query: |
+    SELECT
+      schemaname,
+      tablename,
+      calls,
+      total_time,
+      mean_time,
+      rows
+    FROM pg_stat_statements pss
+    JOIN pg_stat_user_tables psut ON pss.query LIKE '%' || psut.tablename || '%'
+    WHERE schemaname = 'public'
+    ORDER BY mean_time DESC
+    LIMIT 100
+  master: true
+  metrics:
+    - schemaname:
+        usage: "LABEL"
+        description: "Schema name"
+    - tablename:
+        usage: "LABEL"
+        description: "Table name"
+    - calls:
+        usage: "COUNTER"
+        description: "Number of times executed"
+    - total_time:
+        usage: "COUNTER"
+        description: "Total time spent in the statement, in milliseconds"
+    - mean_time:
+        usage: "GAUGE"
+        description: "Mean time spent in the statement, in milliseconds"
+    - rows:
+        usage: "COUNTER"
+        description: "Total number of rows retrieved or affected by the statement"
+
+pg_locks:
+  query: |
+    SELECT
+      mode,
+      locktype,
+      count(*) as locks_count
+    FROM pg_locks
+    WHERE NOT granted
+    GROUP BY mode, locktype
+  master: true
+  metrics:
+    - mode:
+        usage: "LABEL"
+        description: "Lock mode"
+    - locktype:
+        usage: "LABEL"
+        description: "Lock type"
+    - locks_count:
+        usage: "GAUGE"
+        description: "Number of locks"
+
+pg_replication:
+  query: |
+    SELECT
+      client_addr,
+      state,
+      EXTRACT(EPOCH FROM (now() - backend_start))::int as connection_age_seconds,
+      EXTRACT(EPOCH FROM (now() - state_change))::int as state_age_seconds,
+      COALESCE(EXTRACT(EPOCH FROM (now() - sent_lsn::pg_lsn)),0) as lag_seconds
+    FROM pg_stat_replication
+  master: true
+  metrics:
+    - client_addr:
+        usage: "LABEL"
+        description: "Client IP address"
+    - state:
+        usage: "LABEL"
+        description: "Replication state"
+    - connection_age_seconds:
+        usage: "GAUGE"
+        description: "Connection age in seconds"
+    - state_age_seconds:
+        usage: "GAUGE"
+        description: "State age in seconds"
+    - lag_seconds:
+        usage: "GAUGE"
+        description: "Replication lag in seconds"
+
+pg_settings:
+  query: |
+    SELECT
+      name,
+      setting::float as value
+    FROM pg_settings
+    WHERE name IN ('max_connections', 'shared_buffers', 'effective_cache_size', 'work_mem', 'checkpoint_completion_target')
+  master: true
+  metrics:
+    - name:
+        usage: "LABEL"
+        description: "Setting name"
+    - value:
+        usage: "GAUGE"
+        description: "Setting value"

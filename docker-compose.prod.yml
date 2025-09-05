@@ -339,6 +339,7 @@ services:
       - "9090:9090"
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/rules:/etc/prometheus/rules:ro
       - prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
@@ -346,14 +347,144 @@ services:
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
       - '--web.enable-lifecycle'
-      - '--storage.tsdb.retention.time=15d'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-admin-api'
+      - '--alertmanager.timeout=10s'
+    networks:
+      - ocean_network
+    depends_on:
+      - alertmanager
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 1G
+          cpus: '0.5'
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9090/-/healthy || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # AlertManager for notifications
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: ocean_alertmanager
+    restart: always
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./monitoring/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager_data:/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=http://localhost:9093'
+      - '--cluster.advertise-address=0.0.0.0:9093'
     networks:
       - ocean_network
     deploy:
       resources:
         limits:
-          memory: 1G
+          memory: 512M
           cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9093/-/healthy || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Node Exporter for system metrics
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: ocean_node_exporter
+    restart: always
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - ocean_network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.25'
+
+  # PostgreSQL Exporter
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: ocean_postgres_exporter
+    restart: always
+    ports:
+      - "9187:9187"
+    environment:
+      DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable"
+      PG_EXPORTER_EXTEND_QUERY_PATH: "/etc/postgres_exporter/queries.yaml"
+    volumes:
+      - ./monitoring/postgres/queries.yaml:/etc/postgres_exporter/queries.yaml:ro
+    networks:
+      - ocean_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.25'
+
+  # Redis Exporter
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: ocean_redis_exporter
+    restart: always
+    ports:
+      - "9121:9121"
+    environment:
+      REDIS_ADDR: "redis://redis-master:6379"
+      REDIS_PASSWORD: "${REDIS_PASSWORD}"
+    networks:
+      - ocean_network
+    depends_on:
+      redis-master:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.1'
+
+  # Nginx Prometheus Exporter
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:latest
+    container_name: ocean_nginx_exporter
+    restart: always
+    ports:
+      - "9113:9113"
+    command:
+      - '-nginx.scrape-uri=http://nginx-proxy:8080/nginx_status'
+    networks:
+      - ocean_network
+    depends_on:
+      - nginx-proxy
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.1'
 
   grafana:
     image: grafana/grafana:latest
@@ -420,6 +551,53 @@ services:
           memory: 1G
           cpus: '0.5'
 
+  # Jaeger for distributed tracing
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: ocean_jaeger
+    restart: always
+    ports:
+      - "16686:16686"
+      - "14268:14268"
+      - "14250:14250"
+    environment:
+      COLLECTOR_OTLP_ENABLED: true
+      QUERY_BASE_PATH: /jaeger
+    volumes:
+      - jaeger_data:/badger
+    networks:
+      - ocean_network
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+        reservations:
+          memory: 512M
+          cpus: '0.25'
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:16686/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Load Testing with K6
+  k6:
+    image: grafana/k6:latest
+    container_name: ocean_k6
+    volumes:
+      - ./testing/k6:/scripts:ro
+      - k6_results:/results
+    networks:
+      - ocean_network
+    profiles:
+      - testing
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+
   # Database Backup
   postgres-backup:
     image: prodrigestivill/postgres-backup-local
@@ -456,6 +634,12 @@ volumes:
   grafana_data:
     driver: local
   elasticsearch_data:
+    driver: local
+  alertmanager_data:
+    driver: local
+  jaeger_data:
+    driver: local
+  k6_results:
     driver: local
   nginx_logs:
     driver: local
