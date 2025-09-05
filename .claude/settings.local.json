@@ -21,7 +21,8 @@
       "mcp__redis__list",
       "mcp__context7__get-library-docs",
       "mcp__postgres__get_object_details",
-      "mcp__postgres__analyze_db_health"
+      "mcp__postgres__analyze_db_health",
+      "mcp__graphiti_ocean-shopping-center__get_episodes"
     ],
     "deny": [],
     "ask": []
