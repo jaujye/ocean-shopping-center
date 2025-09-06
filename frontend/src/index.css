@@ -1,20 +1,10 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-@theme {
-  --color-ocean-50: #f0fdff;
-  --color-ocean-100: #ccf7fe;
-  --color-ocean-200: #99eefd;
-  --color-ocean-300: #5ddefa;
-  --color-ocean-400: #14c5f0;
-  --color-ocean-500: #00a9d6;
-  --color-ocean-600: #0284b5;
-  --color-ocean-700: #0a6b93;
-  --color-ocean-800: #0e5778;
-  --color-ocean-900: #124965;
-  --color-ocean-950: #052f44;
-}
+/* Ocean theme colors are now defined in tailwind.config.js */
 
 body {
   font-family: 'Inter', system-ui, sans-serif;
