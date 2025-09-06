@@ -58,8 +58,8 @@ const CartSummary: React.FC<CartSummaryProps> = ({
     );
   }
 
-  const hasDiscount = cart.discountAmount > 0 || cart.couponDiscount > 0;
-  const totalSavings = cart.discountAmount + cart.couponDiscount;
+  const hasDiscount = (cart.discountAmount ?? 0) > 0 || (cart.couponDiscount ?? 0) > 0;
+  const totalSavings = (cart.discountAmount ?? 0) + (cart.couponDiscount ?? 0);
 
   return (
     <div className={cn("bg-white rounded-lg shadow-sm border border-gray-200", className)}>
@@ -87,24 +87,24 @@ const CartSummary: React.FC<CartSummaryProps> = ({
         </div>
 
         {/* Applied Coupon */}
-        {cart.appliedCouponCode && cart.couponDiscount > 0 && (
+        {cart.appliedCouponCode && (cart.couponDiscount ?? 0) > 0 && (
           <div className="flex justify-between text-sm">
             <div className="flex items-center text-green-600">
               <TagIcon className="w-4 h-4 mr-1" />
               <span>Coupon ({cart.appliedCouponCode})</span>
             </div>
             <span className="font-medium text-green-600">
-              -${cart.couponDiscount.toFixed(2)}
+              -${(cart.couponDiscount ?? 0).toFixed(2)}
             </span>
           </div>
         )}
 
         {/* Item Discounts */}
-        {cart.discountAmount > 0 && (
+        {(cart.discountAmount ?? 0) > 0 && (
           <div className="flex justify-between text-sm">
             <span className="text-green-600">Item discounts</span>
             <span className="font-medium text-green-600">
-              -${cart.discountAmount.toFixed(2)}
+              -${(cart.discountAmount ?? 0).toFixed(2)}
             </span>
           </div>
         )}

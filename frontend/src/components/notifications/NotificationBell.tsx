@@ -158,17 +158,17 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
   return (
     <div className={cn('relative', className)}>
       {/* Bell Button */}
-      <Button
-        ref={buttonRef}
-        onClick={() => setIsOpen(!isOpen)}
-        variant="ghost"
-        size="sm"
-        className={cn(
-          'relative p-2 transition-colors',
-          isOpen ? 'bg-gray-100 text-gray-900' : 'hover:bg-gray-50'
-        )}
-        aria-label="Notifications"
-      >
+      <div ref={buttonRef}>
+        <Button
+          onClick={() => setIsOpen(!isOpen)}
+          variant="ghost"
+          size="sm"
+          className={cn(
+            'relative p-2 transition-colors',
+            isOpen ? 'bg-gray-100 text-gray-900' : 'hover:bg-gray-50'
+          )}
+          aria-label="Notifications"
+        >
         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
           <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
         </svg>
@@ -188,6 +188,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
           </span>
         )}
       </Button>
+      </div>
 
       {/* Dropdown */}
       {isOpen && (
@@ -223,7 +224,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
                   <Button
                     onClick={handleMarkAllAsRead}
                     variant="ghost"
-                    size="xs"
+                    size="sm"
                     className="text-xs"
                   >
                     Mark all read
@@ -232,7 +233,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
                 <Button
                   onClick={handleClearAll}
                   variant="ghost"
-                  size="xs"
+                  size="sm"
                   className="text-xs text-red-600 hover:text-red-700"
                 >
                   Clear all

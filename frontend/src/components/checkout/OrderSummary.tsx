@@ -1,30 +1,7 @@
 import React, { useState } from 'react';
 import CouponInput from '../coupons/CouponInput';
 import { CouponValidationResponse } from '../../services/couponService';
-
-interface CartItem {
-  id: number;
-  product: {
-    id: number;
-    name: string;
-    imageUrl?: string;
-    price: number;
-  };
-  quantity: number;
-  unitPrice: number;
-  totalPrice: number;
-}
-
-interface Cart {
-  id: number;
-  items: CartItem[];
-  itemCount: number;
-  subtotal: number;
-  taxAmount?: number;
-  shippingAmount?: number;
-  discountAmount?: number;
-  totalAmount: number;
-}
+import { Cart, CartItem } from '../../types';
 
 interface OrderSummaryProps {
   cart: Cart;

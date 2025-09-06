@@ -152,9 +152,10 @@ const ThemedIcon: React.FC<ThemedIconProps> = React.memo(({
     finalSize = getContextualSize();
   }
   
-  // Apply responsive sizing
+  // Apply responsive sizing (hook must be called unconditionally)
+  const responsiveSizeResult = useResponsiveSize(responsiveSize, finalSize);
   if (responsiveSize) {
-    finalSize = useResponsiveSize(responsiveSize, finalSize);
+    finalSize = responsiveSizeResult;
   }
   
   // Build enhanced className with theme-aware classes
