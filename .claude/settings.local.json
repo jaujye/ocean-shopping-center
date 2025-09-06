@@ -30,7 +30,9 @@
       "Bash(git worktree:*)",
       "Bash(git remote remove:*)",
       "Bash(git remote:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(npm run build:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": [],
     "ask": []

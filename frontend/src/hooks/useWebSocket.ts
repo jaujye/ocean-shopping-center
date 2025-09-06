@@ -10,14 +10,27 @@ import {
   MockWebSocketService
 } from '../services/websocket';
 
+interface WebSocketServiceInterface {
+  connect(): Promise<void>;
+  disconnect(): void;
+  send<T>(event: string, data: T): Promise<void>;
+  on<T>(event: string, handler: WebSocketEventHandler<T>): void;
+  off<T>(event: string, handler: WebSocketEventHandler<T>): void;
+  onStatusChange(handler: WebSocketStatusHandler): void;
+  onError(handler: WebSocketErrorHandler): void;
+  getStatus(): WebSocketConnectionStatus;
+  joinChannel(channel: string): Promise<void>;
+  leaveChannel(channel: string): Promise<void>;
+}
+
 export interface UseWebSocketReturn {
   connectionStatus: WebSocketConnectionStatus;
   isConnected: boolean;
   isReconnecting: boolean;
   connect: () => Promise<void>;
   disconnect: () => void;
-  send: <T = any>(event: string, data: T) => Promise<void>;
-  subscribe: <T = any>(event: string, handler: WebSocketEventHandler<T>) => () => void;
+  send: <T>(event: string, data: T) => Promise<void>;
+  subscribe: <T>(event: string, handler: WebSocketEventHandler<T>) => () => void;
   joinChannel: (channel: string) => Promise<void>;
   leaveChannel: (channel: string) => Promise<void>;
   error: string | null;
@@ -54,7 +67,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}): UseWebSocketRet
   });
   const [error, setError] = useState<string | null>(null);
   
-  const serviceRef = useRef<any>(null);
+  const serviceRef = useRef<WebSocketServiceInterface | null>(null);
   const handlersRef = useRef<Map<string, WebSocketEventHandler[]>>(new Map());
   const isInitializedRef = useRef(false);
 
@@ -137,7 +150,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}): UseWebSocketRet
   }, []);
 
   // Send message through WebSocket
-  const send = useCallback(async <T = any>(event: string, data: T): Promise<void> => {
+  const send = useCallback(async <T>(event: string, data: T): Promise<void> => {
     if (!serviceRef.current) {
       throw new Error('WebSocket service not initialized');
     }
@@ -151,7 +164,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}): UseWebSocketRet
   }, []);
 
   // Subscribe to WebSocket events
-  const subscribe = useCallback(<T = any>(
+  const subscribe = useCallback(<T>(
     event: string, 
     handler: WebSocketEventHandler<T>
   ): (() => void) => {
@@ -228,14 +241,21 @@ export const useWebSocket = (options: UseWebSocketOptions = {}): UseWebSocketRet
 
   // Update connection status periodically
   useEffect(() => {
+    let isMounted = true;
+    
     const interval = setInterval(() => {
-      if (serviceRef.current) {
+      if (isMounted && serviceRef.current) {
         const status = serviceRef.current.getStatus();
-        setConnectionStatus(status);
+        if (isMounted) {
+          setConnectionStatus(status);
+        }
       }
     }, 1000);
 
-    return () => clearInterval(interval);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
   return {
@@ -292,7 +312,7 @@ export const useWebSocketChannel = (
 /**
  * Hook for subscribing to specific WebSocket events with automatic cleanup
  */
-export const useWebSocketSubscription = <T = any>(
+export const useWebSocketSubscription = <T>(
   event: string,
   handler: WebSocketEventHandler<T>,
   options: UseWebSocketOptions = {},

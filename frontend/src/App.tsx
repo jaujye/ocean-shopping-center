@@ -1,6 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { CartProvider } from './contexts/CartContext';
+import { NotificationProvider } from './contexts/NotificationContext';
 import ProtectedRoute from './components/guards/ProtectedRoute';
 import Header from './components/layout/Header';
 
@@ -17,11 +19,13 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <div className="min-h-screen bg-slate-50">
-          <Header />
-          
-          <main className="flex-1">
-            <Routes>
+        <NotificationProvider>
+          <CartProvider>
+            <div className="min-h-screen bg-slate-50">
+              <Header />
+              
+              <main className="flex-1">
+                <Routes>
               {/* Public routes */}
               <Route path="/" element={<HomePage />} />
               <Route path="/auth/login" element={<LoginPage />} />
@@ -71,6 +75,8 @@ function App() {
             </Routes>
           </main>
         </div>
+          </CartProvider>
+        </NotificationProvider>
       </AuthProvider>
     </Router>
   );

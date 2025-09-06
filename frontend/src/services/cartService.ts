@@ -90,6 +90,22 @@ class CartService {
   }
 
   /**
+   * Move item from wishlist to cart
+   */
+  async moveToCart(productId: string, quantity: number = 1, selectedOptions?: Record<string, string>): Promise<Cart> {
+    const response = await apiClient.request<Cart>({
+      method: 'POST',
+      url: '/wishlist/move-to-cart',
+      data: {
+        productId,
+        quantity,
+        selectedOptions,
+      },
+    });
+    return response;
+  }
+
+  /**
    * Apply coupon code
    */
   async applyCoupon(couponCode: string): Promise<Cart> {

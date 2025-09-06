@@ -68,3 +68,29 @@ body {
   background-color: theme(colors.ocean.500);
   color: white;
 }
+
+/* Ocean gradient background */
+.bg-ocean-gradient {
+  background: linear-gradient(135deg, 
+    theme(colors.ocean.400) 0%, 
+    theme(colors.ocean.500) 25%, 
+    theme(colors.ocean.600) 50%, 
+    theme(colors.ocean.700) 75%, 
+    theme(colors.ocean.800) 100%);
+}
+
+/* Notification animations */
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
