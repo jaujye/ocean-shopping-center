@@ -134,22 +134,12 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       const updatedCart = await cartService.addToCart(productId, quantity, selectedOptions);
       dispatch({ type: 'SET_CART', payload: updatedCart });
       
-      showNotification({
-        type: 'success',
-        title: 'Added to Cart',
-        message: `Item added to your cart successfully`,
-        duration: 3000,
-      });
+      showNotification('success', 'Item added to your cart successfully', 3000);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to add item to cart';
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
       
-      showNotification({
-        type: 'error',
-        title: 'Failed to Add Item',
-        message: errorMessage,
-        duration: 5000,
-      });
+      showNotification('error', errorMessage, 5000);
       
       throw error;
     } finally {
