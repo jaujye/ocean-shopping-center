@@ -145,15 +145,15 @@ const ProductList: React.FC<ProductListProps> = ({
 
   // Product card component
   const ProductCard: React.FC<{ product: Product }> = ({ product }) => (
-    <Card
-      key={product.id}
+    <div
       className={cn(
         'transition-all duration-200 hover:shadow-md cursor-pointer',
         selectedProducts.includes(product.id) && 'ring-2 ring-ocean-500'
       )}
       onClick={() => onProductSelect(product.id)}
     >
-      <CardContent className="p-4">
+      <Card key={product.id}>
+        <CardContent className="p-4">
         <div className="flex items-start justify-between mb-3">
           <input
             type="checkbox"
@@ -272,8 +272,9 @@ const ProductList: React.FC<ProductListProps> = ({
             <span>★ {product.rating.toFixed(1)} ({product.reviewCount})</span>
           </div>
         </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 
   // Product list row component
