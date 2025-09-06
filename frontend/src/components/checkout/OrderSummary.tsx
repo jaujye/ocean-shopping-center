@@ -41,9 +41,9 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
     }).format(amount);
   };
 
-  const subtotal = cart.subtotal || cart.items.reduce((sum, item) => sum + item.totalPrice, 0);
+  const subtotal = cart.subtotal || cart.items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
   const taxAmount = cart.taxAmount || 0;
-  const shippingAmount = cart.shippingAmount || 0;
+  const shippingAmount = cart.shippingFee || 0;
   const discountAmount = cart.discountAmount || 0;
   const totalAmount = subtotal + taxAmount + shippingAmount - discountAmount;
 
@@ -75,9 +75,9 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
             {cart.items.map((item) => (
               <div key={item.id} className="flex items-start">
                 <div className="flex-shrink-0">
-                  {item.product.imageUrl ? (
+                  {item.product.images && item.product.images[0] ? (
                     <img
-                      src={item.product.imageUrl}
+                      src={item.product.images[0]}
                       alt={item.product.name}
                       className="w-12 h-12 object-cover rounded-md"
                     />
@@ -94,7 +94,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
                   <div className="mt-1 flex items-center justify-between">
                     <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
                     <p className="text-sm font-medium text-gray-900">
-                      {formatCurrency(item.totalPrice)}
+                      {formatCurrency(item.product.price * item.quantity)}
                     </p>
                   </div>
                 </div>

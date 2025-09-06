@@ -273,7 +273,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ className = '' }) => {
                 <CheckoutSteps
                   steps={steps}
                   currentStep={currentStep}
-                  onStepClick={setCurrentStep}
+                  onStepClick={(stepKey: string) => setCurrentStep(stepKey as CheckoutStep)}
                 />
               </div>
 
@@ -340,8 +340,14 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ className = '' }) => {
                     </div>
 
                     <PaymentMethodForm
-                      onPaymentMethodSelect={setPaymentMethodId}
-                      selectedPaymentMethodId={paymentMethodId}
+                      onPaymentSuccess={(payment) => {
+                        console.log('Payment successful:', payment);
+                        setPaymentMethodId(payment.id || payment.paymentMethodId || 'default');
+                      }}
+                      onPaymentError={(error) => {
+                        console.error('Payment error:', error);
+                        setError(error);
+                      }}
                     />
 
                     <div>

@@ -163,12 +163,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       const errorMessage = error instanceof Error ? error.message : 'Failed to update item quantity';
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
       
-      showNotification({
-        type: 'error',
-        title: 'Update Failed',
-        message: errorMessage,
-        duration: 5000,
-      });
+      showNotification('error', `Update Failed: ${errorMessage}`, 5000);
       
       throw error;
     } finally {
@@ -184,22 +179,12 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       const updatedCart = await cartService.removeFromCart(itemId);
       dispatch({ type: 'SET_CART', payload: updatedCart });
       
-      showNotification({
-        type: 'success',
-        title: 'Item Removed',
-        message: 'Item removed from your cart',
-        duration: 3000,
-      });
+      showNotification('success', 'Item removed from your cart', 3000);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to remove item';
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
       
-      showNotification({
-        type: 'error',
-        title: 'Remove Failed',
-        message: errorMessage,
-        duration: 5000,
-      });
+      showNotification('error', `Remove Failed: ${errorMessage}`, 5000);
       
       throw error;
     } finally {
@@ -213,24 +198,23 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
 
     try {
       await cartService.clearCart();
-      dispatch({ type: 'SET_CART', payload: { items: [], subtotal: 0, taxAmount: 0, shippingFee: 0, total: 0 } });
+      dispatch({ type: 'SET_CART', payload: { 
+        id: 'empty-cart', 
+        items: [], 
+        itemCount: 0, 
+        subtotal: 0, 
+        taxAmount: 0, 
+        shippingFee: 0, 
+        total: 0, 
+        totalAmount: 0 
+      } });
       
-      showNotification({
-        type: 'success',
-        title: 'Cart Cleared',
-        message: 'All items removed from your cart',
-        duration: 3000,
-      });
+      showNotification('success', 'All items removed from your cart', 3000);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to clear cart';
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
       
-      showNotification({
-        type: 'error',
-        title: 'Clear Failed',
-        message: errorMessage,
-        duration: 5000,
-      });
+      showNotification('error', `Clear Failed: ${errorMessage}`, 5000);
       
       throw error;
     } finally {
@@ -246,22 +230,12 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       const updatedCart = await cartService.moveToWishlist(itemId);
       dispatch({ type: 'SET_CART', payload: updatedCart });
       
-      showNotification({
-        type: 'success',
-        title: 'Saved for Later',
-        message: 'Item moved to your wishlist',
-        duration: 3000,
-      });
+      showNotification('success', 'Item moved to your wishlist', 3000);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to save item';
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
       
-      showNotification({
-        type: 'error',
-        title: 'Save Failed',
-        message: errorMessage,
-        duration: 5000,
-      });
+      showNotification('error', `Save Failed: ${errorMessage}`, 5000);
       
       throw error;
     } finally {
@@ -277,22 +251,12 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       const updatedCart = await cartService.moveToCart(itemId);
       dispatch({ type: 'SET_CART', payload: updatedCart });
       
-      showNotification({
-        type: 'success',
-        title: 'Moved to Cart',
-        message: 'Item moved back to your cart',
-        duration: 3000,
-      });
+      showNotification('success', 'Item moved back to your cart', 3000);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to move item';
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
       
-      showNotification({
-        type: 'error',
-        title: 'Move Failed',
-        message: errorMessage,
-        duration: 5000,
-      });
+      showNotification('error', `Move Failed: ${errorMessage}`, 5000);
       
       throw error;
     } finally {
@@ -308,22 +272,12 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       const updatedCart = await cartService.applyCoupon(couponCode);
       dispatch({ type: 'SET_CART', payload: updatedCart });
       
-      showNotification({
-        type: 'success',
-        title: 'Coupon Applied',
-        message: `Coupon "${couponCode}" applied successfully`,
-        duration: 3000,
-      });
+      showNotification('success', `Coupon "${couponCode}" applied successfully`, 3000);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to apply coupon';
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
       
-      showNotification({
-        type: 'error',
-        title: 'Coupon Failed',
-        message: errorMessage,
-        duration: 5000,
-      });
+      showNotification('error', `Coupon Failed: ${errorMessage}`, 5000);
       
       throw error;
     } finally {
@@ -339,22 +293,12 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       const updatedCart = await cartService.removeCoupon();
       dispatch({ type: 'SET_CART', payload: updatedCart });
       
-      showNotification({
-        type: 'success',
-        title: 'Coupon Removed',
-        message: 'Coupon removed from your cart',
-        duration: 3000,
-      });
+      showNotification('success', 'Coupon removed from your cart', 3000);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to remove coupon';
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
       
-      showNotification({
-        type: 'error',
-        title: 'Remove Failed',
-        message: errorMessage,
-        duration: 5000,
-      });
+      showNotification('error', `Remove Failed: ${errorMessage}`, 5000);
       
       throw error;
     } finally {
@@ -385,22 +329,12 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       // This would call the merge endpoint
       await loadCart(); // Reload cart after merge
       
-      showNotification({
-        type: 'success',
-        title: 'Cart Merged',
-        message: 'Your guest cart has been merged successfully',
-        duration: 3000,
-      });
+      showNotification('success', 'Your guest cart has been merged successfully', 3000);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to merge cart';
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
       
-      showNotification({
-        type: 'error',
-        title: 'Merge Failed',
-        message: errorMessage,
-        duration: 5000,
-      });
+      showNotification('error', `Merge Failed: ${errorMessage}`, 5000);
       
       throw error;
     } finally {

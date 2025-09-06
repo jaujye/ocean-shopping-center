@@ -71,10 +71,12 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
     setMessageText('');
     
     // Stop typing indicator
-    if (isTyping) {
+    if (isTyping && chat.activeConversation) {
       chat.stopTyping(chat.activeConversation.id);
       setIsTyping(false);
     }
+
+    if (!chat.activeConversation) return;
 
     try {
       await chat.sendMessage({

@@ -458,6 +458,3 @@ export default Icon;
 
 // Additional utility exports
 export { iconMap, sizeMap, colorMap };
-
-// Type exports for external usage
-export type { IconProps, IconName, IconVariant, IconSize, IconColor };

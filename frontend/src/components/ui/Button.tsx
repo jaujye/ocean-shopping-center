@@ -60,7 +60,7 @@ const Button: React.FC<ButtonProps> = ({
       
       return (
         <ThemedIcon
-          name={icon}
+          name={icon as IconName}
           size={iconSize}
           color={iconColor}
         />
@@ -83,7 +83,7 @@ const Button: React.FC<ButtonProps> = ({
   // If asChild is true, return children with button styles applied
   if (asChild && React.isValidElement(children)) {
     return React.cloneElement(children, {
-      ...children.props,
+      ...(children.props || {}),
       className: cn(buttonClasses, (children.props as any)?.className),
     } as any);
   }
