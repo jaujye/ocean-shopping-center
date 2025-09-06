@@ -74,10 +74,13 @@ interface IconOptimizationType {
     recommendations: string[];
   };
   generateOptimizationReport(tracker: IconUsageTracker): {
-    summary: string;
-    bundleImpact: ReturnType<IconOptimizationType['estimateBundleImpact']>;
-    patterns: ReturnType<IconOptimizationType['analyzeUsagePatterns']>;
-    optimizationTips: string[];
+    summary: {
+      totalUsedIcons: number;
+      estimatedBundleImpact: ReturnType<IconOptimizationType['estimateBundleImpact']>;
+    };
+    usageAnalysis: ReturnType<IconOptimizationType['analyzeUsagePatterns']>;
+    recommendations: string[];
+    timestamp: string;
   };
 }
 

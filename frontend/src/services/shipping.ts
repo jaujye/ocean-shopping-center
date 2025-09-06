@@ -15,11 +15,46 @@ import { ApiResponse } from '../types';
 
 // Mock data for development
 const MOCK_CARRIERS = [
-  { id: 'dhl' as ShippingCarrier, name: 'DHL Express', logo: '/images/carriers/dhl.png' },
-  { id: 'fedex' as ShippingCarrier, name: 'FedEx', logo: '/images/carriers/fedex.png' },
-  { id: 'ups' as ShippingCarrier, name: 'UPS', logo: '/images/carriers/ups.png' },
-  { id: 'usps' as ShippingCarrier, name: 'USPS', logo: '/images/carriers/usps.png' },
-  { id: 'local' as ShippingCarrier, name: 'Local Delivery', logo: '/images/carriers/local.png' },
+  { 
+    id: 'dhl' as ShippingCarrier, 
+    name: 'DHL Express', 
+    logo: '/images/carriers/dhl.png',
+    services: [
+      { carrierId: 'dhl' as ShippingCarrier, serviceCode: 'EXPRESS', serviceName: 'DHL Express Worldwide', deliveryTime: '1-3 business days', features: ['tracking', 'insurance', 'signature'] }
+    ]
+  },
+  { 
+    id: 'fedex' as ShippingCarrier, 
+    name: 'FedEx', 
+    logo: '/images/carriers/fedex.png',
+    services: [
+      { carrierId: 'fedex' as ShippingCarrier, serviceCode: 'OVERNIGHT', serviceName: 'FedEx Overnight', deliveryTime: '1 business day', features: ['tracking', 'insurance'] }
+    ]
+  },
+  { 
+    id: 'ups' as ShippingCarrier, 
+    name: 'UPS', 
+    logo: '/images/carriers/ups.png',
+    services: [
+      { carrierId: 'ups' as ShippingCarrier, serviceCode: 'GROUND', serviceName: 'UPS Ground', deliveryTime: '1-5 business days', features: ['tracking'] }
+    ]
+  },
+  { 
+    id: 'usps' as ShippingCarrier, 
+    name: 'USPS', 
+    logo: '/images/carriers/usps.png',
+    services: [
+      { carrierId: 'usps' as ShippingCarrier, serviceCode: 'PRIORITY', serviceName: 'Priority Mail', deliveryTime: '1-3 business days', features: ['tracking'] }
+    ]
+  },
+  { 
+    id: 'local' as ShippingCarrier, 
+    name: 'Local Delivery', 
+    logo: '/images/carriers/local.png',
+    services: [
+      { carrierId: 'local' as ShippingCarrier, serviceCode: 'SAME_DAY', serviceName: 'Same Day Delivery', deliveryTime: 'Same day', features: ['tracking', 'signature'] }
+    ]
+  },
 ];
 
 const MOCK_SHIPMENTS: Shipment[] = [
@@ -324,6 +359,7 @@ class ShippingService {
       if (!shipment) {
         return {
           success: false,
+          data: null as any,
           message: 'Shipment not found',
           errors: ['No shipment found with this tracking number']
         };
@@ -481,6 +517,7 @@ class ShippingService {
       if (!shipment) {
         return {
           success: false,
+          data: null as any,
           message: 'Shipment not found',
         };
       }
@@ -523,6 +560,7 @@ class ShippingService {
       if (!shipment) {
         return {
           success: false,
+          data: null as any,
           message: 'Shipment not found',
         };
       }

@@ -206,7 +206,7 @@ class CouponService {
     return coupon.status === CouponStatus.ACTIVE &&
            now >= validFrom &&
            now <= validUntil &&
-           (coupon.usageLimit === null || coupon.timesUsed < coupon.usageLimit);
+           (coupon.usageLimit === null || coupon.usageLimit === undefined || coupon.timesUsed < coupon.usageLimit);
   }
 
   /**

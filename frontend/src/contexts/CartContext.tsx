@@ -398,7 +398,7 @@ export const cartUtils = {
 
   hasDiscounts: (cart: Cart): boolean => {
     if (!cart) return false;
-    return cart.discountAmount > 0 || 
+    return (cart.discountAmount ?? 0) > 0 || 
            cart.items.some(item => 
              item.product.originalPrice && item.product.originalPrice > item.product.price
            );

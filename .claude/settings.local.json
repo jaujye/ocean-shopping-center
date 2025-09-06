@@ -32,7 +32,15 @@
       "Bash(git remote:*)",
       "Bash(mkdir:*)",
       "Bash(npm run build:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(npm start)",
+      "Bash(PORT=3001 npm start)",
+      "Bash(npm uninstall:*)",
+      "Bash(npm install:*)",
+      "Bash(taskkill:*)",
+      "Bash(PORT=3002 npm start)",
+      "Bash(PORT=3005 npm start)",
+      "Bash(rm:*)"
     ],
     "deny": [],
     "ask": []

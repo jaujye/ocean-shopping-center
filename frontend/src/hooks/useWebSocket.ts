@@ -112,7 +112,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}): UseWebSocketRet
       // Re-register all existing handlers
       handlersRef.current.forEach((handlers, event) => {
         handlers.forEach(handler => {
-          serviceRef.current.on(event, handler);
+          serviceRef.current?.on(event, handler);
         });
       });
 
@@ -126,6 +126,10 @@ export const useWebSocket = (options: UseWebSocketOptions = {}): UseWebSocketRet
   const connect = useCallback(async (): Promise<void> => {
     if (!serviceRef.current) {
       initialize();
+    }
+    
+    if (!serviceRef.current) {
+      throw new Error('WebSocket service initialization failed');
     }
     
     try {
