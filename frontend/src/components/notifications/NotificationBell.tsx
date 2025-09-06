@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { SystemNotification, NotificationPriority, NotificationType } from '../../types/notifications';
 import { useNotifications } from '../../hooks/useNotifications';
-import { Button } from '../ui/Button';
-import { LoadingSpinner } from '../ui/LoadingSpinner';
+import Button from '../ui/Button';
+import LoadingSpinner from '../ui/LoadingSpinner';
 import { cn } from '../../utils/cn';
 
 interface NotificationBellProps {

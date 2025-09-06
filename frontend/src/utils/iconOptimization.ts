@@ -61,8 +61,28 @@ export class IconUsageTracker {
   }
 }
 
+// Type definition for icon optimization utilities
+interface IconOptimizationType {
+  estimateBundleImpact(iconCount: number): {
+    estimatedKB: number;
+    description: string;
+  };
+  analyzeUsagePatterns(stats: Array<{ icon: IconName; count: number }>): {
+    criticalIcons: IconName[];
+    frequentIcons: IconName[];
+    rareIcons: IconName[];
+    recommendations: string[];
+  };
+  generateOptimizationReport(tracker: IconUsageTracker): {
+    summary: string;
+    bundleImpact: ReturnType<IconOptimizationType['estimateBundleImpact']>;
+    patterns: ReturnType<IconOptimizationType['analyzeUsagePatterns']>;
+    optimizationTips: string[];
+  };
+}
+
 // Icon bundle optimization helpers
-export const IconOptimization = {
+export const IconOptimization: IconOptimizationType = {
   // Get estimated bundle size impact of icons
   estimateBundleImpact(iconCount: number): {
     estimatedKB: number;

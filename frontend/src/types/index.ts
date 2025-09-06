@@ -3,6 +3,8 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  firstName?: string;
+  lastName?: string;
   role: UserRole;
   avatar?: string;
   isActive: boolean;
@@ -192,14 +194,25 @@ export interface CartItem {
   product: Product;
   quantity: number;
   selectedOptions?: Record<string, string>;
+  isGift?: boolean;
+  giftMessage?: string;
+  notes?: string;
 }
 
 export interface Cart {
+  id: string;
   items: CartItem[];
+  itemCount: number;
+  totalItems?: number;
   subtotal: number;
   taxAmount: number;
   shippingFee: number;
+  discountAmount?: number;
+  couponDiscount?: number;
+  appliedCouponCode?: string;
   total: number;
+  totalAmount: number;
+  currency?: string;
 }
 
 // API response types

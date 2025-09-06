@@ -1,5 +1,5 @@
 // Re-export all order-related types from orderService for convenience
-export {
+export type {
   OrderStatus,
   Address,
   CheckoutRequest,

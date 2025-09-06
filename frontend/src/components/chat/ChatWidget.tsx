@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChatMessage, ChatConversation, ChatTypingIndicator } from '../../types/chat';
 import { useChat } from '../../hooks/useChat';
-import { Button } from '../ui/Button';
-import { Modal } from '../ui/Modal';
-import { LoadingSpinner } from '../ui/LoadingSpinner';
+import Button from '../ui/Button';
+import Modal from '../ui/Modal';
+import LoadingSpinner from '../ui/LoadingSpinner';
 import { cn } from '../../utils/cn';
 
 interface ChatWidgetProps {

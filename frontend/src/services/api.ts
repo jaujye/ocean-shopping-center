@@ -245,6 +245,27 @@ class ApiClient {
     const response = await this.client.request<ApiResponse<T>>(config);
     return response.data.data;
   }
+
+  // Generic HTTP methods for use by other services
+  async get<T = any>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
+    return this.client.get<T>(url, config);
+  }
+
+  async post<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
+    return this.client.post<T>(url, data, config);
+  }
+
+  async put<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
+    return this.client.put<T>(url, data, config);
+  }
+
+  async patch<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
+    return this.client.patch<T>(url, data, config);
+  }
+
+  async delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
+    return this.client.delete<T>(url, config);
+  }
 }
 
 // Create and export a singleton instance

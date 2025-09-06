@@ -1,3 +1,5 @@
+import { Product } from './index';
+
 export interface ProductFilters {
   search?: string;
   category?: string;
