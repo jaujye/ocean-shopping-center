@@ -40,7 +40,9 @@
       "Bash(taskkill:*)",
       "Bash(PORT=3002 npm start)",
       "Bash(PORT=3005 npm start)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(npm run:*)"
     ],
     "deny": [],
     "ask": []

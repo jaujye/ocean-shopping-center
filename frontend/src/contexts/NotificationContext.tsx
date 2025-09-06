@@ -31,6 +31,10 @@ interface NotificationProviderProps {
 export const NotificationProvider: React.FC<NotificationProviderProps> = ({ children }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
+  const removeNotification = useCallback((id: string) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
+  }, []);
+
   const showNotification = useCallback((
     type: Notification['type'],
     message: string,
@@ -51,11 +55,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
         removeNotification(id);
       }, duration);
     }
-  }, []);
-
-  const removeNotification = useCallback((id: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
-  }, []);
+  }, [removeNotification]);
 
   const clearNotifications = useCallback(() => {
     setNotifications([]);

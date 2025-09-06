@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import { NotificationProvider } from './contexts/NotificationContext';
+import { IconThemeProvider } from './contexts/IconThemeContext';
 import ProtectedRoute from './components/guards/ProtectedRoute';
 import Header from './components/layout/Header';
 
@@ -19,10 +20,11 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <NotificationProvider>
-          <CartProvider>
-            <div className="min-h-screen bg-slate-50">
-              <Header />
+        <IconThemeProvider>
+          <NotificationProvider>
+            <CartProvider>
+              <div className="min-h-screen bg-slate-50">
+                <Header />
               
               <main className="flex-1">
                 <Routes>
@@ -75,8 +77,9 @@ function App() {
             </Routes>
           </main>
         </div>
-          </CartProvider>
-        </NotificationProvider>
+            </CartProvider>
+          </NotificationProvider>
+        </IconThemeProvider>
       </AuthProvider>
     </Router>
   );

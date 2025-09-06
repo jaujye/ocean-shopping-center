@@ -52,7 +52,7 @@ const getContextualSize = (): IconSize => {
 };
 
 // Responsive size utilities
-const useResponsiveSize = (responsiveSize?: ThemedIconProps['responsiveSize'], fallback: IconSize = 'md'): IconSize => {
+const getResponsiveSize = (responsiveSize?: ThemedIconProps['responsiveSize'], fallback: IconSize = 'md'): IconSize => {
   if (!responsiveSize) return fallback;
   
   // Simple responsive logic - could be enhanced with proper breakpoint detection
@@ -152,10 +152,9 @@ const ThemedIcon: React.FC<ThemedIconProps> = React.memo(({
     finalSize = getContextualSize();
   }
   
-  // Apply responsive sizing (hook must be called unconditionally)
-  const responsiveSizeResult = useResponsiveSize(responsiveSize, finalSize);
+  // Apply responsive sizing
   if (responsiveSize) {
-    finalSize = responsiveSizeResult;
+    finalSize = getResponsiveSize(responsiveSize, finalSize);
   }
   
   // Build enhanced className with theme-aware classes

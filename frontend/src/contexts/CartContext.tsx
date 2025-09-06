@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
-import { Cart, CartItem, Product } from '../types';
+import { Cart } from '../types';
 import { cartService } from '../services/cartService';
 import { useAuth } from './AuthContext';
 import { useNotification } from './NotificationContext';
@@ -79,7 +79,7 @@ interface CartProviderProps {
 
 export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(cartReducer, initialState);
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { showNotification } = useNotification();
 
   // Computed values
@@ -90,17 +90,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   useEffect(() => {
     loadCart();
   }, [isAuthenticated]);
-
-  // Auto-refresh cart periodically
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (!state.isLoading && !state.isUpdating) {
-        validateCart();
-      }
-    }, 5 * 60 * 1000); // Every 5 minutes
-
-    return () => clearInterval(interval);
-  }, [state.isLoading, state.isUpdating]);
 
   const loadCart = async () => {
     dispatch({ type: 'SET_LOADING', payload: true });
@@ -147,6 +136,27 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     }
   }, [showNotification]);
 
+  const removeFromCart = useCallback(async (itemId: string) => {
+    dispatch({ type: 'SET_UPDATING', payload: true });
+    dispatch({ type: 'SET_ERROR', payload: null });
+
+    try {
+      const updatedCart = await cartService.removeFromCart(itemId);
+      dispatch({ type: 'SET_CART', payload: updatedCart });
+      
+      showNotification('success', 'Item removed from your cart', 3000);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to remove item';
+      dispatch({ type: 'SET_ERROR', payload: errorMessage });
+      
+      showNotification('error', `Remove Failed: ${errorMessage}`, 5000);
+      
+      throw error;
+    } finally {
+      dispatch({ type: 'SET_UPDATING', payload: false });
+    }
+  }, [showNotification]);
+
   const updateCartItem = useCallback(async (itemId: string, quantity: number) => {
     if (quantity < 1) {
       await removeFromCart(itemId);
@@ -169,28 +179,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     } finally {
       dispatch({ type: 'SET_UPDATING', payload: false });
     }
-  }, [showNotification]);
-
-  const removeFromCart = useCallback(async (itemId: string) => {
-    dispatch({ type: 'SET_UPDATING', payload: true });
-    dispatch({ type: 'SET_ERROR', payload: null });
-
-    try {
-      const updatedCart = await cartService.removeFromCart(itemId);
-      dispatch({ type: 'SET_CART', payload: updatedCart });
-      
-      showNotification('success', 'Item removed from your cart', 3000);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to remove item';
-      dispatch({ type: 'SET_ERROR', payload: errorMessage });
-      
-      showNotification('error', `Remove Failed: ${errorMessage}`, 5000);
-      
-      throw error;
-    } finally {
-      dispatch({ type: 'SET_UPDATING', payload: false });
-    }
-  }, [showNotification]);
+  }, [showNotification, removeFromCart]);
 
   const clearCart = useCallback(async () => {
     dispatch({ type: 'SET_UPDATING', payload: true });
@@ -307,15 +296,29 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   }, [showNotification]);
 
   const validateCart = useCallback(async (): Promise<string[]> => {
-    try {
-      // This would call the validation endpoint
-      // For now, return empty array (no issues)
-      return [];
-    } catch (error) {
-      console.error('Cart validation failed:', error);
-      return ['Failed to validate cart'];
-    }
+    // This would call the validation endpoint
+    // try {
+    //   const validationResult = await cartService.validateCart();
+    //   return validationResult.issues || [];
+    // } catch (error) {
+    //   console.error('Cart validation failed:', error);
+    //   return ['Failed to validate cart'];
+    // }
+    
+    // For now, return empty array (no issues)
+    return [];
   }, []);
+
+  // Auto-refresh cart periodically
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!state.isLoading && !state.isUpdating) {
+        validateCart();
+      }
+    }, 5 * 60 * 1000); // Every 5 minutes
+
+    return () => clearInterval(interval);
+  }, [state.isLoading, state.isUpdating, validateCart]);
 
   const mergeGuestCart = useCallback(async (guestSessionId: string) => {
     if (!isAuthenticated) {

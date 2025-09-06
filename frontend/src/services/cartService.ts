@@ -1,5 +1,5 @@
 import { apiClient } from './api';
-import { CartItem, Cart, Product } from '../types';
+import { Cart } from '../types';
 
 class CartService {
   /**
