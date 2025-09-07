@@ -3,14 +3,11 @@ package com.ocean.shopping.model.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.springframework.data.redis.core.RedisHash;
-import org.springframework.data.redis.core.TimeToLive;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Cart entity with Redis-based session management for shopping cart functionality.
@@ -23,7 +20,6 @@ import java.util.concurrent.TimeUnit;
     @Index(name = "idx_carts_status", columnList = "status"),
     @Index(name = "idx_carts_updated_at", columnList = "updated_at")
 })
-@RedisHash("cart")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -84,9 +80,6 @@ public class Cart extends BaseEntity {
     @Column(name = "merged_from_session")
     private String mergedFromSession;
 
-    // Redis TTL for session-based carts (30 days)
-    @TimeToLive(unit = TimeUnit.DAYS)
-    private Long ttl = 30L;
 
     /**
      * Cart status enum for tracking cart lifecycle

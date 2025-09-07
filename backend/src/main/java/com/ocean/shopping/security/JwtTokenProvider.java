@@ -23,14 +23,14 @@ import java.util.concurrent.TimeUnit;
 public class JwtTokenProvider {
 
     private final SecretKey secretKey;
-    private final int jwtExpirationInMs;
-    private final int refreshTokenExpirationInMs;
+    private final long jwtExpirationInMs;
+    private final long refreshTokenExpirationInMs;
     private final StringRedisTemplate redisTemplate;
 
     public JwtTokenProvider(
             @Value("${ocean.shopping.jwt.secret}") String jwtSecret,
-            @Value("${ocean.shopping.jwt.expiration}") int jwtExpirationInMs,
-            @Value("${ocean.shopping.jwt.refresh-expiration}") int refreshTokenExpirationInMs,
+            @Value("${ocean.shopping.jwt.expiration}") long jwtExpirationInMs,
+            @Value("${ocean.shopping.jwt.refresh-expiration}") long refreshTokenExpirationInMs,
             StringRedisTemplate redisTemplate) {
         this.secretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes());
         this.jwtExpirationInMs = jwtExpirationInMs;

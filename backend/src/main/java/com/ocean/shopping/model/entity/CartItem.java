@@ -6,7 +6,6 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
-import org.springframework.data.redis.core.RedisHash;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -21,7 +20,6 @@ import java.util.Map;
     @Index(name = "idx_cart_items_product_id", columnList = "product_id"),
     @Index(name = "idx_cart_items_product_variant_id", columnList = "product_variant_id")
 })
-@RedisHash("cart_item")
 @Getter
 @Setter
 @NoArgsConstructor
