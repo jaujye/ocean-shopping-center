@@ -124,48 +124,49 @@ public class OrderService {
         // Generate unique payment lock key for this order
         String paymentLockKey = lockManager.paymentLockKey(order.getId().toString());
         
-        return lockManager.executeWithLockOrThrow(paymentLockKey, () -> {
-            // Process payment
-            PaymentProviderService.PaymentIntent paymentIntent = 
-                paymentService.createPaymentIntent(order, PaymentProvider.STRIPE);
+        try {
+            return lockManager.executeWithLockOrThrow(paymentLockKey, () -> {
+                // Process payment
+                PaymentProviderService.PaymentIntent paymentIntent = 
+                    paymentService.createPaymentIntent(order, PaymentProvider.STRIPE);
 
-            // Confirm payment
-            PaymentProviderService.PaymentResult paymentResult = 
-                paymentService.confirmPayment(paymentIntent.getId(), request.getPaymentMethodId());
+                // Confirm payment
+                PaymentProviderService.PaymentResult paymentResult = 
+                    paymentService.confirmPayment(paymentIntent.getId(), request.getPaymentMethodId());
 
-            if (paymentResult.getStatus() != PaymentStatus.COMPLETED) {
-                throw new BadRequestException("Payment failed: " + paymentResult.getFailureReason());
-            }
+                if (paymentResult.getStatus() != PaymentStatus.COMPLETED) {
+                    throw new BadRequestException("Payment failed: " + paymentResult.getFailureReason());
+                }
 
-            // Update order status after successful payment
-            order.setStatus(OrderStatus.CONFIRMED);
-            order.setConfirmedAt(ZonedDateTime.now());
-            order = orderRepository.save(order);
+                // Update order status after successful payment
+                order.setStatus(OrderStatus.CONFIRMED);
+                order.setConfirmedAt(ZonedDateTime.now());
+                order = orderRepository.save(order);
 
-            // Clear cart after successful order
-            if (userId != null) {
-                cartService.clearCart(userId);
-            } else {
-                cartService.clearSessionCart(sessionId);
-            }
+                // Clear cart after successful order
+                if (userId != null) {
+                    cartService.clearCart(userId);
+                } else {
+                    cartService.clearSessionCart(sessionId);
+                }
 
-            // Send confirmation email asynchronously
-            CompletableFuture.runAsync(() -> sendOrderConfirmationEmail(order));
+                // Send confirmation email asynchronously
+                CompletableFuture.runAsync(() -> sendOrderConfirmationEmail(order));
 
-            // Create shipment if needed
-            CompletableFuture.runAsync(() -> createShipmentForOrder(order));
+                // Create shipment if needed
+                CompletableFuture.runAsync(() -> createShipmentForOrder(order));
 
-            log.info("Checkout completed successfully for order: {}", order.getOrderNumber());
+                log.info("Checkout completed successfully for order: {}", order.getOrderNumber());
 
-            return CheckoutResponse.success(
-                order.getId(),
-                order.getOrderNumber(),
-                order.getTotalAmount(),
-                order.getCurrency(),
-                paymentIntent.getId(),
-                order.getCustomerEmail()
-            );
-
+                return CheckoutResponse.success(
+                    order.getId(),
+                    order.getOrderNumber(),
+                    order.getTotalAmount(),
+                    order.getCurrency(),
+                    paymentIntent.getId(),
+                    order.getCustomerEmail()
+                );
+            });
         } catch (Exception e) {
             log.error("Checkout failed: {}", e.getMessage(), e);
             return CheckoutResponse.error("Checkout failed: " + e.getMessage());

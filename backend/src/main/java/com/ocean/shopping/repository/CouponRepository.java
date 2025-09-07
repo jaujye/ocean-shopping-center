@@ -139,10 +139,6 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
     @Query("SELECT c FROM Coupon c WHERE c.firstTimeCustomerOnly = true AND c.status = 'ACTIVE' AND c.validFrom <= :now AND c.validUntil >= :now AND (c.usageLimit IS NULL OR c.timesUsed < c.usageLimit)")
     List<Coupon> findFirstTimeCustomerCoupons(@Param("now") ZonedDateTime now);
 
-    /**
-     * Find percentage-based coupons
-     */
-    Page<Coupon> findByType(CouponType type, Pageable pageable);
 
     /**
      * Get total discount provided by all coupons
