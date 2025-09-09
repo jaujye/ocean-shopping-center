@@ -486,6 +486,74 @@ public class NotificationService {
         }
     }
 
+    /**
+     * Send invoice email notification
+     */
+    @Async
+    public void sendInvoiceEmail(String customerEmail, String customerName, com.ocean.shopping.model.entity.Invoice invoice, String invoiceUrl) {
+        try {
+            log.info("Sending invoice email for order {} to {}", 
+                    invoice.getOrder().getOrderNumber(), customerEmail);
+
+            String subject = String.format("Invoice for Order %s", invoice.getOrder().getOrderNumber());
+            String message = String.format("Dear %s, your invoice for order %s is ready. Total amount: %s %s", 
+                    customerName, invoice.getOrder().getOrderNumber(), 
+                    invoice.getAmount(), invoice.getOrder().getCurrency());
+
+            // Create in-app notification
+            NotificationRequest notificationRequest = new NotificationRequest();
+            notificationRequest.setTitle(subject);
+            notificationRequest.setMessage(message);
+            notificationRequest.setType(NotificationRequest.NotificationType.ORDER_UPDATE);
+            notificationRequest.setPriority(NotificationRequest.Priority.MEDIUM);
+            notificationRequest.setActionUrl(invoiceUrl);
+            
+            // Find user by email and send notification
+            userRepository.findByEmail(customerEmail).ifPresent(user -> {
+                createAndSendNotification(user, notificationRequest);
+            });
+
+            // TODO: Integrate with email service when available
+            log.info("Invoice email notification processed for {}", customerEmail);
+
+        } catch (Exception e) {
+            log.error("Failed to send invoice email to {}: {}", customerEmail, e.getMessage());
+        }
+    }
+
+    /**
+     * Send refund confirmation email notification
+     */
+    @Async
+    public void sendRefundConfirmationEmail(String customerEmail, String customerName, Order order, BigDecimal refundAmount, String reason) {
+        try {
+            log.info("Sending refund confirmation email for order {} - amount: {}", 
+                    order.getOrderNumber(), refundAmount);
+
+            String subject = String.format("Refund Confirmation - Order %s", order.getOrderNumber());
+            String message = String.format("Dear %s, your refund of %s %s for order %s has been confirmed. Reason: %s. The refund will be processed within 3-5 business days.", 
+                    customerName, refundAmount, order.getCurrency(), order.getOrderNumber(), reason);
+
+            // Create in-app notification
+            NotificationRequest notificationRequest = new NotificationRequest();
+            notificationRequest.setTitle(subject);
+            notificationRequest.setMessage(message);
+            notificationRequest.setType(NotificationRequest.NotificationType.PAYMENT_UPDATE);
+            notificationRequest.setPriority(NotificationRequest.Priority.HIGH);
+            
+            // Find user by email and send notification
+            userRepository.findByEmail(customerEmail).ifPresent(user -> {
+                createAndSendNotification(user, notificationRequest);
+            });
+
+            // TODO: Integrate with email service when available
+            log.info("Refund confirmation notification processed for {}", customerEmail);
+
+        } catch (Exception e) {
+            log.error("Failed to send refund confirmation email to {}: {}", customerEmail, e.getMessage());
+        }
+    }
+
     private String getStatusDisplayText(OrderStatus status) {
         return switch (status) {
             case PENDING -> "Awaiting Payment";

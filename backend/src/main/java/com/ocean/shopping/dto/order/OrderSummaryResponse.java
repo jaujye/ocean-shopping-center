@@ -18,7 +18,7 @@ import java.time.ZonedDateTime;
 @Builder
 public class OrderSummaryResponse {
 
-    private Long id;
+    private String id;
     private String orderNumber;
     private OrderStatus status;
     private String customerEmail;
@@ -30,7 +30,7 @@ public class OrderSummaryResponse {
     private int itemCount;
     
     // Store information
-    private Long storeId;
+    private String storeId;
     private String storeName;
     
     // Timestamps

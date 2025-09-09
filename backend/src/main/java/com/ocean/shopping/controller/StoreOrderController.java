@@ -41,7 +41,7 @@ public class StoreOrderController {
      */
     @GetMapping
     public ResponseEntity<Page<OrderSummaryResponse>> getStoreOrders(
-            @PathVariable Long storeId,
+            @PathVariable UUID storeId,
             @PageableDefault(size = 20) Pageable pageable,
             @RequestParam(required = false) OrderStatus status,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime startDate,
@@ -68,7 +68,7 @@ public class StoreOrderController {
      */
     @GetMapping("/search")
     public ResponseEntity<Page<OrderSummaryResponse>> searchStoreOrders(
-            @PathVariable Long storeId,
+            @PathVariable UUID storeId,
             @RequestParam String query,
             @PageableDefault(size = 20) Pageable pageable,
             Authentication authentication) {
@@ -91,8 +91,8 @@ public class StoreOrderController {
      */
     @GetMapping("/{orderId}")
     public ResponseEntity<OrderResponse> getStoreOrder(
-            @PathVariable Long storeId,
-            @PathVariable Long orderId,
+            @PathVariable UUID storeId,
+            @PathVariable UUID orderId,
             Authentication authentication) {
         
         try {
@@ -113,7 +113,7 @@ public class StoreOrderController {
      */
     @GetMapping("/attention")
     public ResponseEntity<List<OrderSummaryResponse>> getOrdersRequiringAttention(
-            @PathVariable Long storeId,
+            @PathVariable UUID storeId,
             Authentication authentication) {
         
         try {
@@ -134,8 +134,8 @@ public class StoreOrderController {
      */
     @PutMapping("/{orderId}/status")
     public ResponseEntity<String> updateOrderStatus(
-            @PathVariable Long storeId,
-            @PathVariable Long orderId,
+            @PathVariable UUID storeId,
+            @PathVariable UUID orderId,
             @Valid @RequestBody OrderStatusUpdateRequest request,
             Authentication authentication) {
         
@@ -163,8 +163,8 @@ public class StoreOrderController {
      */
     @PostMapping("/{orderId}/refund")
     public ResponseEntity<String> processRefund(
-            @PathVariable Long storeId,
-            @PathVariable Long orderId,
+            @PathVariable UUID storeId,
+            @PathVariable UUID orderId,
             @RequestParam BigDecimal amount,
             @RequestParam String reason,
             Authentication authentication) {
@@ -193,7 +193,7 @@ public class StoreOrderController {
      */
     @GetMapping("/analytics/revenue")
     public ResponseEntity<Map<String, Object>> getRevenueAnalytics(
-            @PathVariable Long storeId,
+            @PathVariable UUID storeId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime endDate,
             Authentication authentication) {
@@ -219,7 +219,7 @@ public class StoreOrderController {
      */
     @GetMapping("/analytics/status-summary")
     public ResponseEntity<?> getOrderStatusSummary(
-            @PathVariable Long storeId,
+            @PathVariable UUID storeId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime endDate,
             Authentication authentication) {
@@ -243,7 +243,7 @@ public class StoreOrderController {
      */
     @GetMapping("/export")
     public ResponseEntity<?> exportOrders(
-            @PathVariable Long storeId,
+            @PathVariable UUID storeId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime endDate,
             @RequestParam(required = false) OrderStatus status,
@@ -268,7 +268,7 @@ public class StoreOrderController {
      */
     @PutMapping("/bulk/status")
     public ResponseEntity<String> bulkUpdateOrderStatus(
-            @PathVariable Long storeId,
+            @PathVariable UUID storeId,
             @RequestParam List<Long> orderIds,
             @RequestParam OrderStatus status,
             @RequestParam(required = false) String notes,
@@ -294,7 +294,7 @@ public class StoreOrderController {
      */
     @GetMapping("/shipments/pending")
     public ResponseEntity<List<OrderSummaryResponse>> getPendingShipments(
-            @PathVariable Long storeId,
+            @PathVariable UUID storeId,
             Authentication authentication) {
         
         try {

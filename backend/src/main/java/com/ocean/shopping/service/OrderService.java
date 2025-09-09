@@ -69,12 +69,12 @@ public class OrderService {
         try {
             // Get cart
             Cart cart = getCartForCheckout(userId, sessionId);
-            if (cart == null || cart.getCartItems().isEmpty()) {
+            if (cart == null || cart.getItems().isEmpty()) {
                 throw new BadRequestException("Cart is empty");
             }
 
             // Collect all inventory locks needed for this order
-            List<String> inventoryLockKeys = cart.getCartItems().stream()
+            List<String> inventoryLockKeys = cart.getItems().stream()
                     .map(item -> lockManager.inventoryLockKey(item.getProduct().getId().toString()))
                     .collect(Collectors.toList());
 
@@ -132,10 +132,10 @@ public class OrderService {
 
                 // Confirm payment
                 PaymentProviderService.PaymentResult paymentResult = 
-                    paymentService.confirmPayment(paymentIntent.getId(), request.getPaymentMethodId());
+                    paymentService.confirmPayment(paymentIntent.id(), request.getPaymentMethodId());
 
-                if (paymentResult.getStatus() != PaymentStatus.COMPLETED) {
-                    throw new BadRequestException("Payment failed: " + paymentResult.getFailureReason());
+                if (!"succeeded".equals(paymentResult.status())) {
+                    throw new BadRequestException("Payment failed: " + paymentResult.failureReason());
                 }
 
                 // Update order status after successful payment
@@ -163,7 +163,7 @@ public class OrderService {
                     order.getOrderNumber(),
                     order.getTotalAmount(),
                     order.getCurrency(),
-                    paymentIntent.getId(),
+                    paymentIntent.id(),
                     order.getCustomerEmail()
                 );
             });

@@ -284,7 +284,7 @@ public class OrderManagementService {
      * Get store revenue analytics
      */
     @Transactional(readOnly = true)
-    public Map<String, Object> getStoreRevenueAnalytics(Long storeId, ZonedDateTime startDate, ZonedDateTime endDate) {
+    public Map<String, Object> getStoreRevenueAnalytics(UUID storeId, ZonedDateTime startDate, ZonedDateTime endDate) {
         Store store = storeRepository.findById(storeId)
             .orElseThrow(() -> new ResourceNotFoundException("Store not found"));
 
@@ -379,7 +379,7 @@ public class OrderManagementService {
     // Conversion methods
     private OrderSummaryResponse convertToSummaryResponse(Order order) {
         return OrderSummaryResponse.builder()
-            .id(order.getId())
+            .id(order.getId().toString())
             .orderNumber(order.getOrderNumber())
             .status(order.getStatus())
             .customerEmail(order.getCustomerEmail())
@@ -387,7 +387,7 @@ public class OrderManagementService {
             .totalAmount(order.getTotalAmount())
             .currency(order.getCurrency())
             .itemCount(order.getOrderItems() != null ? order.getOrderItems().size() : 0)
-            .storeId(order.getStore().getId())
+            .storeId(order.getStore().getId().toString())
             .storeName(order.getStore().getName())
             .createdAt(order.getCreatedAt())
             .updatedAt(order.getUpdatedAt())
@@ -400,7 +400,7 @@ public class OrderManagementService {
 
     private OrderResponse convertToOrderResponse(Order order) {
         return OrderResponse.builder()
-            .id(order.getId())
+            .id(order.getId().toString())
             .orderNumber(order.getOrderNumber())
             .status(order.getStatus())
             .customerEmail(order.getCustomerEmail())
@@ -424,7 +424,7 @@ public class OrderManagementService {
             .totalAmount(order.getTotalAmount())
             .currency(order.getCurrency())
             .orderItems(convertToOrderItemResponses(order.getOrderItems()))
-            .storeId(order.getStore().getId())
+            .storeId(order.getStore().getId().toString())
             .storeName(order.getStore().getName())
             .createdAt(order.getCreatedAt())
             .updatedAt(order.getUpdatedAt())
@@ -442,20 +442,20 @@ public class OrderManagementService {
         
         return orderItems.stream()
             .map(item -> OrderItemResponse.builder()
-                .id(item.getId())
-                .productId(item.getProduct().getId())
+                .id(item.getId().toString())
+                .productId(item.getProduct().getId().toString())
                 .productName(item.getProduct().getName())
                 .productSku(item.getProduct().getSku())
                 .quantity(item.getQuantity())
                 .unitPrice(item.getUnitPrice())
                 .totalPrice(item.getTotalPrice())
-                .currency(item.getCurrency())
-                .variantName(item.getProductVariant() != null ? item.getProductVariant().getName() : null)
-                .variantSku(item.getProductVariant() != null ? item.getProductVariant().getSku() : null)
-                .storeId(item.getProduct().getStore().getId())
+                .currency(item.getOrder().getCurrency())
+                .variantName(item.getVariant() != null ? item.getVariant().getName() : null)
+                .variantSku(item.getVariant() != null ? item.getVariant().getSku() : null)
+                .storeId(item.getProduct().getStore().getId().toString())
                 .storeName(item.getProduct().getStore().getName())
                 .build())
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private boolean requiresAttention(Order order) {
