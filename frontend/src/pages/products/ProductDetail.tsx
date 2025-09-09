@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Product } from '../../types';
-import { productService } from '../../services/productService';
-import { cartService } from '../../services/cartService';
+import { useProduct, useAddToCart, useIsInWishlist, useToggleWishlist } from '../../hooks/queries';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
@@ -142,56 +140,58 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, productName }) => {
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [product, setProduct] = useState<Product | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
-  const [isAddingToCart, setIsAddingToCart] = useState(false);
-  const [isInWishlist, setIsInWishlist] = useState(false);
   const [activeTab, setActiveTab] = useState<'description' | 'specifications' | 'reviews'>('description');
 
-  // Load product data
-  useEffect(() => {
-    const loadProduct = async () => {
-      if (!id) {
-        setError('Product ID not found');
-        setIsLoading(false);
-        return;
-      }
+  // React Query hooks
+  const { 
+    data: product, 
+    isLoading, 
+    error, 
+    isError 
+  } = useProduct(id || '');
+  
+  const { 
+    data: isInWishlist = false,
+  } = useIsInWishlist(id || '');
 
-      try {
-        const productData = await productService.getProduct(id);
-        setProduct(productData);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load product');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadProduct();
-  }, [id]);
+  // Mutations
+  const addToCartMutation = useAddToCart();
+  const toggleWishlistMutation = useToggleWishlist();
 
   // Handle add to cart
   const handleAddToCart = async () => {
     if (!product) return;
-
-    setIsAddingToCart(true);
-    try {
-      await cartService.addToCart(product.id, quantity);
-      // Could add toast notification here
-    } catch (error) {
-      console.error('Failed to add to cart:', error);
-      // Could show error toast
-    } finally {
-      setIsAddingToCart(false);
-    }
+    
+    addToCartMutation.mutate(
+      { productId: product.id, quantity },
+      {
+        onSuccess: () => {
+          // Could add toast notification here
+          console.log('Product added to cart successfully');
+        },
+        onError: (error) => {
+          console.error('Failed to add to cart:', error);
+          // Could show error toast
+        },
+      }
+    );
   };
 
   // Handle wishlist toggle
   const handleWishlistToggle = () => {
-    setIsInWishlist(!isInWishlist);
-    // TODO: Implement actual wishlist API call
+    if (!product) return;
+    
+    toggleWishlistMutation.mutate(product.id, {
+      onSuccess: () => {
+        // Could add toast notification here
+        console.log('Wishlist updated successfully');
+      },
+      onError: (error) => {
+        console.error('Failed to update wishlist:', error);
+        // Could show error toast
+      },
+    });
   };
 
   // Handle share
@@ -248,7 +248,7 @@ const ProductDetail: React.FC = () => {
   }
 
   // Error state
-  if (error || !product) {
+  if (isError || !product) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -257,7 +257,9 @@ const ProductDetail: React.FC = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <p className="text-lg font-semibold">Product not found</p>
-            <p className="text-sm text-gray-600 mt-2">{error}</p>
+            <p className="text-sm text-gray-600 mt-2">
+              {error instanceof Error ? error.message : 'Product could not be loaded'}
+            </p>
           </div>
           <Button onClick={() => navigate('/products')} variant="primary">
             Browse Products
@@ -385,8 +387,8 @@ const ProductDetail: React.FC = () => {
               <div className="flex space-x-4">
                 <Button
                   onClick={handleAddToCart}
-                  disabled={!product.inStock || isAddingToCart}
-                  loading={isAddingToCart}
+                  disabled={!product.inStock || addToCartMutation.isPending}
+                  loading={addToCartMutation.isPending}
                   loadingText="Adding..."
                   variant="primary"
                   size="lg"
@@ -398,6 +400,8 @@ const ProductDetail: React.FC = () => {
                 
                 <Button
                   onClick={handleWishlistToggle}
+                  disabled={toggleWishlistMutation.isPending}
+                  loading={toggleWishlistMutation.isPending}
                   variant={isInWishlist ? "secondary" : "outline"}
                   size="lg"
                   leftIcon={<HeartIcon filled={isInWishlist} />}

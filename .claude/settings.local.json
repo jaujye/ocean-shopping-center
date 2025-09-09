@@ -1,7 +1,13 @@
 {
   "permissions": {
     "allow": [
-      "Bash(timeout 30s mvn spring-boot:run)"
+      "Bash(timeout 30s mvn spring-boot:run)",
+      "Bash(git push:*)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)",
+      "mcp__graphiti_ocean-shopping-center__add_memory"
     ],
     "deny": [],
     "ask": []

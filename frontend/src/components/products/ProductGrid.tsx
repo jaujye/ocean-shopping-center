@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Product, PaginatedResponse } from '../../types';
+import React, { useState, useMemo } from 'react';
+import { Product } from '../../types';
 import { ProductFilters as FiltersType } from '../../types/product';
-import { productService } from '../../services/productService';
+import { useInfiniteProducts } from '../../hooks/queries';
 import ProductCard from './ProductCard';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import Button from '../ui/Button';
@@ -49,65 +49,31 @@ const ProductGrid: React.FC<ProductGridProps> = ({
   showRefreshButton = true,
   itemsPerPage = 20,
 }) => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: itemsPerPage,
-    total: 0,
-    totalPages: 0,
-  });
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Load products whenever filters change
-  useEffect(() => {
-    loadProducts(1); // Reset to page 1 when filters change
-  }, [filters]);
+  // Use React Query for data fetching
+  const {
+    data,
+    error,
+    isLoading,
+    isError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    refetch,
+    isRefetching,
+  } = useInfiniteProducts({
+    ...filters,
+    size: itemsPerPage,
+  });
 
-  const loadProducts = async (page: number = pagination.page) => {
-    setIsLoading(true);
-    setError(null);
+  // Flatten the pages into a single array of products
+  const products = useMemo(() => {
+    return data?.pages.flatMap(page => page.data) ?? [];
+  }, [data]);
 
-    try {
-      const params = {
-        ...filters,
-        page,
-        limit: pagination.limit,
-      };
-
-      const response: PaginatedResponse<Product> = await productService.getStoreProducts(params);
-      
-      if (page === 1) {
-        setProducts(response.data);
-      } else {
-        // For pagination, append new products
-        setProducts(prev => [...prev, ...response.data]);
-      }
-
-      setPagination(response.pagination);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load products');
-      console.error('Failed to load products:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Handle refresh
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    await loadProducts(1);
-    setIsRefreshing(false);
-  };
-
-  // Handle load more
-  const handleLoadMore = () => {
-    if (pagination.page < pagination.totalPages) {
-      loadProducts(pagination.page + 1);
-    }
-  };
+  // Get total count from the first page
+  const totalCount = data?.pages[0]?.pagination.total ?? 0;
 
   // Memoized grid layout classes
   const gridClasses = useMemo(() => {
@@ -127,7 +93,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
   }
 
   // Render error state
-  if (error && products.length === 0) {
+  if (isError && products.length === 0) {
     return (
       <div className={cn("text-center py-12", className)}>
         <div className="text-red-500 mb-4">
@@ -135,9 +101,11 @@ const ProductGrid: React.FC<ProductGridProps> = ({
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <p className="text-lg font-semibold">Failed to load products</p>
-          <p className="text-sm text-gray-600 mt-2">{error}</p>
+          <p className="text-sm text-gray-600 mt-2">
+            {error instanceof Error ? error.message : 'An unexpected error occurred'}
+          </p>
         </div>
-        <Button onClick={handleRefresh} variant="primary">
+        <Button onClick={() => refetch()} variant="primary">
           Try Again
         </Button>
       </div>
@@ -158,7 +126,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
           </p>
         </div>
         {showRefreshButton && (
-          <Button onClick={handleRefresh} variant="outline">
+          <Button onClick={() => refetch()} variant="outline">
             Refresh
           </Button>
         )}
@@ -171,7 +139,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
       {/* Header with view mode toggle and results info */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="text-sm text-gray-600">
-          Showing {products.length} of {pagination.total} products
+          Showing {products.length} of {totalCount} products
           {filters.search && (
             <span> for "{filters.search}"</span>
           )}
@@ -180,11 +148,11 @@ const ProductGrid: React.FC<ProductGridProps> = ({
         <div className="flex items-center space-x-2">
           {showRefreshButton && (
             <Button
-              onClick={handleRefresh}
+              onClick={() => refetch()}
               variant="outline"
               size="sm"
-              leftIcon={<RefreshIcon className={isRefreshing ? "animate-spin" : ""} />}
-              disabled={isRefreshing}
+              leftIcon={<RefreshIcon className={isRefetching ? "animate-spin" : ""} />}
+              disabled={isRefetching}
             >
               Refresh
             </Button>
@@ -234,29 +202,30 @@ const ProductGrid: React.FC<ProductGridProps> = ({
       </div>
 
       {/* Loading more indicator */}
-      {isLoading && products.length > 0 && (
+      {isFetchingNextPage && (
         <div className="flex justify-center py-8">
           <LoadingSpinner size="md" />
         </div>
       )}
 
       {/* Load More Button */}
-      {!isLoading && pagination.page < pagination.totalPages && (
+      {hasNextPage && !isFetchingNextPage && (
         <div className="flex justify-center py-8">
           <Button
-            onClick={handleLoadMore}
+            onClick={() => fetchNextPage()}
             variant="outline"
             size="lg"
+            disabled={isFetchingNextPage}
           >
             Load More Products
           </Button>
         </div>
       )}
 
-      {/* Pagination info */}
-      {pagination.totalPages > 1 && (
+      {/* End of results indicator */}
+      {!hasNextPage && products.length > 0 && (
         <div className="text-center text-sm text-gray-500 py-4">
-          Page {pagination.page} of {pagination.totalPages}
+          You've reached the end of the results
         </div>
       )}
     </div>
