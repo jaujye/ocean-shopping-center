@@ -170,4 +170,39 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
                                   @Param("statuses") List<OrderStatus> statuses,
                                   @Param("startDate") ZonedDateTime startDate,
                                   @Param("endDate") ZonedDateTime endDate);
+
+    // Missing methods required by OrderManagementService
+    
+    // Status and date range combined queries
+    @Query("SELECT o FROM Order o WHERE o.status = :status AND o.createdAt >= :startDate AND o.createdAt <= :endDate ORDER BY o.createdAt DESC")
+    Page<Order> findByStatusAndDateRange(@Param("status") OrderStatus status,
+                                        @Param("startDate") ZonedDateTime startDate,
+                                        @Param("endDate") ZonedDateTime endDate,
+                                        Pageable pageable);
+
+    @Query("SELECT o FROM Order o WHERE o.store = :store AND o.status = :status AND o.createdAt >= :startDate AND o.createdAt <= :endDate ORDER BY o.createdAt DESC")
+    Page<Order> findByStoreAndStatusAndDateRange(@Param("store") Store store,
+                                                @Param("status") OrderStatus status,
+                                                @Param("startDate") ZonedDateTime startDate,
+                                                @Param("endDate") ZonedDateTime endDate,
+                                                Pageable pageable);
+
+    // Global analytics methods
+    @Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.createdAt >= :startDate AND o.createdAt <= :endDate AND o.status IN :statuses")
+    BigDecimal sumTotalAmountByDateRangeAndStatuses(@Param("startDate") ZonedDateTime startDate,
+                                                   @Param("endDate") ZonedDateTime endDate,
+                                                   @Param("statuses") List<OrderStatus> statuses);
+
+    @Query("SELECT COUNT(o) FROM Order o WHERE o.createdAt >= :startDate AND o.createdAt <= :endDate AND o.status IN :statuses")
+    long countByDateRangeAndStatuses(@Param("startDate") ZonedDateTime startDate,
+                                    @Param("endDate") ZonedDateTime endDate,
+                                    @Param("statuses") List<OrderStatus> statuses);
+
+    // Top stores by revenue for admin analytics
+    @Query("SELECT o.store.id, o.store.name, SUM(o.totalAmount) as revenue, COUNT(o) as orderCount FROM Order o " +
+           "WHERE o.status IN :statuses AND o.createdAt >= :startDate AND o.createdAt <= :endDate " +
+           "GROUP BY o.store.id, o.store.name ORDER BY revenue DESC")
+    List<Object[]> getTopStoresByRevenue(@Param("statuses") List<OrderStatus> statuses,
+                                        @Param("startDate") ZonedDateTime startDate,
+                                        @Param("endDate") ZonedDateTime endDate);
 }

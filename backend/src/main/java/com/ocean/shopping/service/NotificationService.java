@@ -7,6 +7,8 @@ import com.ocean.shopping.exception.BadRequestException;
 import com.ocean.shopping.exception.ResourceNotFoundException;
 import com.ocean.shopping.model.entity.Notification;
 import com.ocean.shopping.model.entity.User;
+import com.ocean.shopping.model.entity.Order;
+import com.ocean.shopping.model.entity.enums.OrderStatus;
 import com.ocean.shopping.repository.NotificationRepository;
 import com.ocean.shopping.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -413,5 +416,85 @@ public class NotificationService {
         } catch (Exception e) {
             log.error("Failed to send notification update to user {}: {}", userId, e.getMessage());
         }
+    }
+
+    // Order-specific email notifications
+
+    /**
+     * Send order status update email notification
+     */
+    @Async
+    public void sendOrderStatusUpdateEmail(String customerEmail, Order order, OrderStatus oldStatus, OrderStatus newStatus) {
+        try {
+            log.info("Sending order status update email for order {} from {} to {}", 
+                    order.getOrderNumber(), oldStatus, newStatus);
+
+            String subject = String.format("Order %s - Status Update", order.getOrderNumber());
+            String message = String.format("Your order %s has been updated from %s to %s", 
+                    order.getOrderNumber(), getStatusDisplayText(oldStatus), getStatusDisplayText(newStatus));
+
+            // Create in-app notification
+            NotificationRequest notificationRequest = new NotificationRequest();
+            notificationRequest.setTitle(subject);
+            notificationRequest.setMessage(message);
+            notificationRequest.setType(NotificationRequest.NotificationType.ORDER_UPDATE);
+            notificationRequest.setPriority(NotificationRequest.Priority.MEDIUM);
+            
+            // Find user by email and send notification
+            userRepository.findByEmail(customerEmail).ifPresent(user -> {
+                createAndSendNotification(user, notificationRequest);
+            });
+
+            // TODO: Integrate with email service when available
+            log.info("Order status update notification processed for {}", customerEmail);
+
+        } catch (Exception e) {
+            log.error("Failed to send order status update email to {}: {}", customerEmail, e.getMessage());
+        }
+    }
+
+    /**
+     * Send refund notification email
+     */
+    @Async
+    public void sendRefundNotificationEmail(String customerEmail, Order order, BigDecimal amount, String reason) {
+        try {
+            log.info("Sending refund notification email for order {} - amount: {}", 
+                    order.getOrderNumber(), amount);
+
+            String subject = String.format("Refund Processed - Order %s", order.getOrderNumber());
+            String message = String.format("A refund of %s %s has been processed for your order %s. Reason: %s", 
+                    amount, order.getCurrency(), order.getOrderNumber(), reason);
+
+            // Create in-app notification
+            NotificationRequest notificationRequest = new NotificationRequest();
+            notificationRequest.setTitle(subject);
+            notificationRequest.setMessage(message);
+            notificationRequest.setType(NotificationRequest.NotificationType.PAYMENT_UPDATE);
+            notificationRequest.setPriority(NotificationRequest.Priority.HIGH);
+            
+            // Find user by email and send notification
+            userRepository.findByEmail(customerEmail).ifPresent(user -> {
+                createAndSendNotification(user, notificationRequest);
+            });
+
+            // TODO: Integrate with email service when available
+            log.info("Refund notification processed for {}", customerEmail);
+
+        } catch (Exception e) {
+            log.error("Failed to send refund notification email to {}: {}", customerEmail, e.getMessage());
+        }
+    }
+
+    private String getStatusDisplayText(OrderStatus status) {
+        return switch (status) {
+            case PENDING -> "Awaiting Payment";
+            case CONFIRMED -> "Order Confirmed";
+            case PROCESSING -> "Being Prepared";
+            case SHIPPED -> "Shipped";
+            case DELIVERED -> "Delivered";
+            case CANCELLED -> "Cancelled";
+            case RETURNED -> "Returned";
+        };
     }
 }

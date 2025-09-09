@@ -415,6 +415,51 @@ public class TrackingService {
     }
 
     /**
+     * Update order tracking with a tracking number
+     */
+    @Transactional
+    public void updateOrderTracking(Long orderId, String trackingNumber) {
+        log.info("Updating order {} with tracking number: {}", orderId, trackingNumber);
+        
+        // Find existing shipment for this order or create new one
+        Optional<Shipment> existingShipment = shipmentRepository.findByOrder_Id(orderId);
+        
+        if (existingShipment.isPresent()) {
+            Shipment shipment = existingShipment.get();
+            shipment.setTrackingNumber(trackingNumber);
+            shipmentRepository.save(shipment);
+        } else {
+            log.warn("No shipment found for order {}. Tracking number {} noted but shipment may need to be created.", 
+                    orderId, trackingNumber);
+        }
+    }
+
+    /**
+     * Initialize order tracking when order is shipped
+     */
+    @Transactional
+    public void initializeOrderTracking(Long orderId) {
+        log.info("Initializing tracking for order: {}", orderId);
+        
+        // Find shipment for this order
+        Optional<Shipment> shipmentOpt = shipmentRepository.findByOrder_Id(orderId);
+        
+        if (shipmentOpt.isPresent()) {
+            Shipment shipment = shipmentOpt.get();
+            if (shipment.getTrackingNumber() != null && !shipment.getTrackingNumber().isEmpty()) {
+                // Start tracking updates for this shipment
+                updateTrackingInfoAsync(shipment.getTrackingNumber());
+                log.info("Started tracking updates for order {} with tracking number: {}", 
+                        orderId, shipment.getTrackingNumber());
+            } else {
+                log.warn("Cannot initialize tracking for order {} - no tracking number available", orderId);
+            }
+        } else {
+            log.warn("Cannot initialize tracking for order {} - no shipment found", orderId);
+        }
+    }
+
+    /**
      * Statistics data class
      */
     @lombok.Data

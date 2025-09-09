@@ -420,4 +420,22 @@ public class PaymentService {
     private String generateTransactionId() {
         return "txn_" + UUID.randomUUID().toString().replace("-", "");
     }
+
+    /**
+     * Process refund for an order by finding the latest successful payment
+     */
+    @Transactional
+    public void processRefund(Long orderId, BigDecimal refundAmount, String reason) {
+        log.info("Processing refund for order {} - amount: {}", orderId, refundAmount);
+        
+        // Find the most recent successful payment for this order
+        List<Payment> payments = paymentRepository.findByOrder_IdOrderByCreatedAtDesc(orderId);
+        Payment payment = payments.stream()
+            .filter(p -> p.getStatus() == PaymentStatus.SUCCEEDED)
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("No successful payment found for order " + orderId));
+        
+        // Process the refund
+        refundPayment(payment.getId(), refundAmount, reason);
+    }
 }
