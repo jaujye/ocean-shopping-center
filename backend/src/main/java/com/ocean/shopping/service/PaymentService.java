@@ -110,7 +110,7 @@ public class PaymentService {
      * Capture an authorized payment
      */
     @Transactional
-    public Payment capturePayment(Long paymentId, BigDecimal amount) {
+    public Payment capturePayment(UUID paymentId, BigDecimal amount) {
         Payment payment = paymentRepository.findById(paymentId)
             .orElseThrow(() -> new RuntimeException("Payment not found"));
         
@@ -155,7 +155,7 @@ public class PaymentService {
      * Refund a payment
      */
     @Transactional
-    public Payment refundPayment(Long paymentId, BigDecimal refundAmount, String reason) {
+    public Payment refundPayment(UUID paymentId, BigDecimal refundAmount, String reason) {
         Payment payment = paymentRepository.findById(paymentId)
             .orElseThrow(() -> new RuntimeException("Payment not found"));
         
@@ -202,7 +202,7 @@ public class PaymentService {
      * Cancel a payment
      */
     @Transactional
-    public Payment cancelPayment(Long paymentId) {
+    public Payment cancelPayment(UUID paymentId) {
         Payment payment = paymentRepository.findById(paymentId)
             .orElseThrow(() -> new RuntimeException("Payment not found"));
         
@@ -292,7 +292,7 @@ public class PaymentService {
      * Set a payment method as default
      */
     @Transactional
-    public void setDefaultPaymentMethod(User user, Long paymentMethodId) {
+    public void setDefaultPaymentMethod(User user, UUID paymentMethodId) {
         PaymentMethod paymentMethod = paymentMethodRepository.findById(paymentMethodId)
             .orElseThrow(() -> new RuntimeException("Payment method not found"));
         
@@ -312,7 +312,7 @@ public class PaymentService {
      * Remove a payment method
      */
     @Transactional
-    public void removePaymentMethod(User user, Long paymentMethodId) {
+    public void removePaymentMethod(User user, UUID paymentMethodId) {
         PaymentMethod paymentMethod = paymentMethodRepository.findById(paymentMethodId)
             .orElseThrow(() -> new RuntimeException("Payment method not found"));
         
@@ -365,7 +365,7 @@ public class PaymentService {
     /**
      * Get payments for an order
      */
-    public List<Payment> getOrderPayments(Long orderId) {
+    public List<Payment> getOrderPayments(UUID orderId) {
         return paymentRepository.findByOrder_IdOrderByCreatedAtDesc(orderId);
     }
 
@@ -379,14 +379,14 @@ public class PaymentService {
     /**
      * Get user payments
      */
-    public Page<Payment> getUserPayments(Long userId, Pageable pageable) {
+    public Page<Payment> getUserPayments(UUID userId, Pageable pageable) {
         return paymentRepository.findRecentPaymentsByUser(userId, pageable);
     }
 
     /**
      * Get store payments
      */
-    public Page<Payment> getStorePayments(Long storeId, Pageable pageable) {
+    public Page<Payment> getStorePayments(UUID storeId, Pageable pageable) {
         return paymentRepository.findPaymentsByStore(storeId, pageable);
     }
 
@@ -425,7 +425,7 @@ public class PaymentService {
      * Process refund for an order by finding the latest successful payment
      */
     @Transactional
-    public void processRefund(Long orderId, BigDecimal refundAmount, String reason) {
+    public void processRefund(UUID orderId, BigDecimal refundAmount, String reason) {
         log.info("Processing refund for order {} - amount: {}", orderId, refundAmount);
         
         // Find the most recent successful payment for this order

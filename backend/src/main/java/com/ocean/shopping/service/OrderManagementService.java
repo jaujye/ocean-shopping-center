@@ -73,7 +73,7 @@ public class OrderManagementService {
      * Get order details for admin
      */
     @Transactional(readOnly = true)
-    public OrderResponse getOrderForAdmin(Long orderId) {
+    public OrderResponse getOrderForAdmin(UUID orderId) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
         return convertToOrderResponse(order);
@@ -129,7 +129,7 @@ public class OrderManagementService {
      * Get orders for a specific store
      */
     @Transactional(readOnly = true)
-    public Page<OrderSummaryResponse> getStoreOrders(Long storeId, Pageable pageable, 
+    public Page<OrderSummaryResponse> getStoreOrders(UUID storeId, Pageable pageable, 
                                                     OrderStatus status, ZonedDateTime startDate, ZonedDateTime endDate) {
         Store store = storeRepository.findById(storeId)
             .orElseThrow(() -> new ResourceNotFoundException("Store not found"));
@@ -153,7 +153,7 @@ public class OrderManagementService {
      * Search orders for a specific store
      */
     @Transactional(readOnly = true)
-    public Page<OrderSummaryResponse> searchStoreOrders(Long storeId, String searchTerm, Pageable pageable) {
+    public Page<OrderSummaryResponse> searchStoreOrders(UUID storeId, String searchTerm, Pageable pageable) {
         Store store = storeRepository.findById(storeId)
             .orElseThrow(() -> new ResourceNotFoundException("Store not found"));
             
@@ -165,7 +165,7 @@ public class OrderManagementService {
      * Get order details for store owner
      */
     @Transactional(readOnly = true)
-    public OrderResponse getStoreOrder(Long storeId, Long orderId) {
+    public OrderResponse getStoreOrder(UUID storeId, UUID orderId) {
         Store store = storeRepository.findById(storeId)
             .orElseThrow(() -> new ResourceNotFoundException("Store not found"));
             
@@ -183,7 +183,7 @@ public class OrderManagementService {
      * Get orders requiring attention for a store
      */
     @Transactional(readOnly = true)
-    public List<OrderSummaryResponse> getStoreOrdersRequiringAttention(Long storeId) {
+    public List<OrderSummaryResponse> getStoreOrdersRequiringAttention(UUID storeId) {
         Store store = storeRepository.findById(storeId)
             .orElseThrow(() -> new ResourceNotFoundException("Store not found"));
             
@@ -197,7 +197,7 @@ public class OrderManagementService {
      * Update order status
      */
     @Transactional
-    public void updateOrderStatus(Long orderId, OrderStatusUpdateRequest request, UUID updatedBy) {
+    public void updateOrderStatus(UUID orderId, OrderStatusUpdateRequest request, UUID updatedBy) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
 
@@ -248,7 +248,7 @@ public class OrderManagementService {
      * Process refund for an order
      */
     @Transactional
-    public void processRefund(Long orderId, BigDecimal amount, String reason, UUID processedBy) {
+    public void processRefund(UUID orderId, BigDecimal amount, String reason, UUID processedBy) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
 

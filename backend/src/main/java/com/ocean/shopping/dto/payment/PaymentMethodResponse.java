@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.ZonedDateTime;
+import java.util.UUID;
 
 /**
  * PaymentMethod response DTO
@@ -21,8 +22,8 @@ import java.time.ZonedDateTime;
 @Schema(description = "Payment method information response")
 public class PaymentMethodResponse {
 
-    @Schema(description = "Payment method unique identifier", example = "1")
-    private Long id;
+    @Schema(description = "Payment method unique identifier", example = "550e8400-e29b-41d4-a716-446655440000")
+    private UUID id;
 
     @Schema(description = "User ID", example = "123e4567-e89b-12d3-a456-426614174000")
     private String userId;

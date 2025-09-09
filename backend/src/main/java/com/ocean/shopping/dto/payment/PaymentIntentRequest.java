@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Payment intent creation request DTO
@@ -22,9 +23,9 @@ import java.util.Map;
 @Schema(description = "Payment intent creation request")
 public class PaymentIntentRequest {
 
-    @Schema(description = "Order ID", example = "1", required = true)
+    @Schema(description = "Order ID", example = "550e8400-e29b-41d4-a716-446655440001", required = true)
     @NotNull(message = "Order ID is required")
-    private Long orderId;
+    private UUID orderId;
 
     @Schema(description = "Payment provider", example = "STRIPE", required = true)
     @NotNull(message = "Payment provider is required")

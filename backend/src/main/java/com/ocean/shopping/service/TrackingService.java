@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -418,7 +419,7 @@ public class TrackingService {
      * Update order tracking with a tracking number
      */
     @Transactional
-    public void updateOrderTracking(Long orderId, String trackingNumber) {
+    public void updateOrderTracking(UUID orderId, String trackingNumber) {
         log.info("Updating order {} with tracking number: {}", orderId, trackingNumber);
         
         // Find existing shipment for this order or create new one
@@ -438,7 +439,7 @@ public class TrackingService {
      * Initialize order tracking when order is shipped
      */
     @Transactional
-    public void initializeOrderTracking(Long orderId) {
+    public void initializeOrderTracking(UUID orderId) {
         log.info("Initializing tracking for order: {}", orderId);
         
         // Find shipment for this order

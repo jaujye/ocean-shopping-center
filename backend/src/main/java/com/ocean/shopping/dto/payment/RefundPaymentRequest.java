@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 /**
  * Refund payment request DTO
@@ -21,9 +22,9 @@ import java.math.BigDecimal;
 @Schema(description = "Refund payment request")
 public class RefundPaymentRequest {
 
-    @Schema(description = "Payment ID", example = "1", required = true)
+    @Schema(description = "Payment ID", example = "550e8400-e29b-41d4-a716-446655440000", required = true)
     @NotNull(message = "Payment ID is required")
-    private Long paymentId;
+    private UUID paymentId;
 
     @Schema(description = "Refund amount (leave null for full refund)", example = "49.99")
     @Positive(message = "Refund amount must be positive")

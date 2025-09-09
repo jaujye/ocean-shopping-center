@@ -187,7 +187,7 @@ public class OrderService {
      * Get order by ID for user
      */
     @Transactional(readOnly = true)
-    public OrderResponse getUserOrder(UUID userId, Long orderId) {
+    public OrderResponse getUserOrder(UUID userId, UUID orderId) {
         User user = userService.getUserById(userId);
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
@@ -218,7 +218,7 @@ public class OrderService {
      * Cancel order by user
      */
     @Transactional
-    public void cancelOrder(UUID userId, Long orderId, String reason) {
+    public void cancelOrder(UUID userId, UUID orderId, String reason) {
         User user = userService.getUserById(userId);
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
@@ -251,7 +251,7 @@ public class OrderService {
      * Update order status (for internal use)
      */
     @Transactional
-    public void updateOrderStatus(Long orderId, OrderStatus newStatus, String internalNotes) {
+    public void updateOrderStatus(UUID orderId, OrderStatus newStatus, String internalNotes) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
 

@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Service for coupon operations and discount calculations
@@ -171,15 +172,15 @@ public class CouponService {
         order.setTotalAmount(newTotal);
 
         // Decrement coupon usage
-        Coupon coupon = orderCoupon.getCoupon();
-        coupon.setTimesUsed(Math.max(0, coupon.getTimesUsed() - 1));
-        if (coupon.getStatus() == CouponStatus.USED_UP && coupon.canBeUsed()) {
-            coupon.setStatus(CouponStatus.ACTIVE);
+        Coupon orderCouponEntity = orderCoupon.getCoupon();
+        orderCouponEntity.setTimesUsed(Math.max(0, orderCouponEntity.getTimesUsed() - 1));
+        if (orderCouponEntity.getStatus() == CouponStatus.USED_UP && orderCouponEntity.canBeUsed()) {
+            orderCouponEntity.setStatus(CouponStatus.ACTIVE);
         }
 
         // Save changes
         orderRepository.save(order);
-        couponRepository.save(coupon);
+        couponRepository.save(orderCouponEntity);
         orderCouponRepository.delete(orderCoupon);
 
         log.info("Successfully removed coupon {} from order {}", couponCode, order.getOrderNumber());
@@ -199,7 +200,7 @@ public class CouponService {
      * Get all active coupons for a store
      */
     @Transactional(readOnly = true)
-    public Page<CouponResponse> getActiveCouponsForStore(Long storeId, Pageable pageable) {
+    public Page<CouponResponse> getActiveCouponsForStore(UUID storeId, Pageable pageable) {
         Store store = storeRepository.findById(storeId)
             .orElseThrow(() -> new ResourceNotFoundException("Store not found: " + storeId));
         
@@ -240,7 +241,7 @@ public class CouponService {
 
     // Private helper methods
 
-    private Optional<Coupon> findCouponForStore(String code, Long storeId) {
+    private Optional<Coupon> findCouponForStore(String code, UUID storeId) {
         Store store = storeRepository.findById(storeId).orElse(null);
         if (store == null) {
             return Optional.empty();
