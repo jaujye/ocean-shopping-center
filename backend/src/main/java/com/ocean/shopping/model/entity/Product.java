@@ -152,6 +152,20 @@ public class Product extends BaseEntity {
         return compareAtPrice != null && compareAtPrice.compareTo(price) > 0;
     }
 
+    /**
+     * Check if product is active (boolean getter for isActive field)
+     */
+    public boolean isActive() {
+        return Boolean.TRUE.equals(this.isActive);
+    }
+
+    /**
+     * Check if product is available for purchase
+     */
+    public boolean isAvailable() {
+        return isActive() && isInStock();
+    }
+
     public BigDecimal getDiscountAmount() {
         if (hasDiscount()) {
             return compareAtPrice.subtract(price);

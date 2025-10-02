@@ -46,7 +46,7 @@ public class InvoiceService {
      * Generate invoice for an order
      */
     @Transactional
-    public Invoice generateInvoice(Long orderId) {
+    public Invoice generateInvoice(UUID orderId) {
         log.info("Generating invoice for order ID: {}", orderId);
 
         Order order = orderRepository.findById(orderId)
@@ -90,7 +90,7 @@ public class InvoiceService {
      * Get invoice by order ID
      */
     @Transactional(readOnly = true)
-    public Invoice getInvoiceByOrderId(Long orderId) {
+    public Invoice getInvoiceByOrderId(UUID orderId) {
         return invoiceRepository.findByOrder_Id(orderId)
             .orElseThrow(() -> new ResourceNotFoundException("Invoice not found for order: " + orderId));
     }
@@ -130,7 +130,7 @@ public class InvoiceService {
      * Send invoice via email
      */
     @Transactional
-    public void sendInvoice(Long invoiceId) {
+    public void sendInvoice(UUID invoiceId) {
         Invoice invoice = invoiceRepository.findById(invoiceId)
             .orElseThrow(() -> new ResourceNotFoundException("Invoice not found: " + invoiceId));
 

@@ -16,8 +16,8 @@ import java.math.BigDecimal;
 @Builder
 public class OrderItemResponse {
 
-    private Long id;
-    private Long productId;
+    private String id;
+    private String productId;
     private String productName;
     private String productSku;
     private String productImageUrl;
@@ -31,6 +31,6 @@ public class OrderItemResponse {
     private String variantSku;
 
     // Store information for marketplace scenarios
-    private Long storeId;
+    private String storeId;
     private String storeName;
 }

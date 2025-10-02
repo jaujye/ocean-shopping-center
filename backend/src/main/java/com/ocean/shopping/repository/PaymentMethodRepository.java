@@ -13,9 +13,10 @@ import org.springframework.stereotype.Repository;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Long> {
+public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, UUID> {
 
     /**
      * Find all active payment methods for a user
@@ -26,7 +27,7 @@ public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Lo
      * Find all active payment methods for a user by user ID
      */
     @Query("SELECT pm FROM PaymentMethod pm WHERE pm.user.id = :userId AND pm.isActive = true ORDER BY pm.isDefault DESC, pm.createdAt DESC")
-    List<PaymentMethod> findActivePaymentMethodsByUserId(@Param("userId") Long userId);
+    List<PaymentMethod> findActivePaymentMethodsByUserId(@Param("userId") UUID userId);
 
     /**
      * Find user's default payment method
@@ -37,7 +38,7 @@ public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Lo
      * Find user's default payment method by user ID
      */
     @Query("SELECT pm FROM PaymentMethod pm WHERE pm.user.id = :userId AND pm.isDefault = true AND pm.isActive = true")
-    Optional<PaymentMethod> findDefaultPaymentMethodByUserId(@Param("userId") Long userId);
+    Optional<PaymentMethod> findDefaultPaymentMethodByUserId(@Param("userId") UUID userId);
 
     /**
      * Find payment method by gateway payment method ID
@@ -97,14 +98,14 @@ public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Lo
      */
     @Modifying
     @Query("UPDATE PaymentMethod pm SET pm.isDefault = false WHERE pm.user.id = :userId")
-    void unsetAllDefaultPaymentMethodsByUserId(@Param("userId") Long userId);
+    void unsetAllDefaultPaymentMethodsByUserId(@Param("userId") UUID userId);
 
     /**
      * Deactivate payment method
      */
     @Modifying
     @Query("UPDATE PaymentMethod pm SET pm.isActive = false WHERE pm.id = :paymentMethodId")
-    void deactivatePaymentMethod(@Param("paymentMethodId") Long paymentMethodId);
+    void deactivatePaymentMethod(@Param("paymentMethodId") UUID paymentMethodId);
 
     /**
      * Deactivate payment methods by gateway payment method ID

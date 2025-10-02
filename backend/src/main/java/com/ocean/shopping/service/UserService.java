@@ -261,6 +261,17 @@ public class UserService {
     }
 
     /**
+     * Get user by ID (internal method for other services)
+     */
+    @Transactional(readOnly = true)
+    public User getUserById(UUID userId) {
+        log.debug("Getting user by ID: {}", userId);
+        
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+    }
+
+    /**
      * User statistics DTO
      */
     @lombok.Builder

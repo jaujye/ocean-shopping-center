@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Process payment request DTO
@@ -21,9 +22,9 @@ import java.util.Map;
 @Schema(description = "Process payment request")
 public class ProcessPaymentRequest {
 
-    @Schema(description = "Order ID", example = "1", required = true)
+    @Schema(description = "Order ID", example = "550e8400-e29b-41d4-a716-446655440001", required = true)
     @NotNull(message = "Order ID is required")
-    private Long orderId;
+    private UUID orderId;
 
     @Schema(description = "Payment method ID or token", example = "pm_abc123", required = true)
     @NotBlank(message = "Payment method ID is required")

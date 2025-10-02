@@ -5,6 +5,7 @@ import com.ocean.shopping.exception.ErrorResponse;
 import com.ocean.shopping.model.entity.Cart;
 import com.ocean.shopping.model.entity.User;
 import com.ocean.shopping.service.CartService;
+import com.ocean.shopping.util.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -20,8 +21,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -318,13 +317,7 @@ public class CartController {
     // Private helper methods
 
     private UUID getCurrentUserId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated() && 
-            authentication.getPrincipal() instanceof User) {
-            User user = (User) authentication.getPrincipal();
-            return user.getId();
-        }
-        return null;
+        return SecurityUtils.getCurrentUserId();
     }
 
     private String getSessionId(HttpServletRequest request) {

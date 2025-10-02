@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.util.UUID;
 
 /**
  * Payment response DTO
@@ -23,17 +24,17 @@ import java.time.ZonedDateTime;
 @Schema(description = "Payment information response")
 public class PaymentResponse {
 
-    @Schema(description = "Payment unique identifier", example = "1")
-    private Long id;
+    @Schema(description = "Payment unique identifier", example = "550e8400-e29b-41d4-a716-446655440000")
+    private UUID id;
 
-    @Schema(description = "Order ID", example = "1")
-    private Long orderId;
+    @Schema(description = "Order ID", example = "550e8400-e29b-41d4-a716-446655440001")
+    private UUID orderId;
 
     @Schema(description = "Order number", example = "ORD-2023-001")
     private String orderNumber;
 
-    @Schema(description = "Payment method ID", example = "1")
-    private Long paymentMethodId;
+    @Schema(description = "Payment method ID", example = "550e8400-e29b-41d4-a716-446655440002")
+    private UUID paymentMethodId;
 
     @Schema(description = "Transaction ID", example = "txn_abc123")
     private String transactionId;

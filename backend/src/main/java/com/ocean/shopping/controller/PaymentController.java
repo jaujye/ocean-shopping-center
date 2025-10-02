@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -136,8 +137,8 @@ public class PaymentController {
     @PostMapping("/{paymentId}/capture")
     @PreAuthorize("hasRole('STORE_OWNER') or hasRole('ADMINISTRATOR')")
     public ResponseEntity<PaymentResponse> capturePayment(
-            @Parameter(description = "Payment ID", example = "1")
-            @PathVariable Long paymentId,
+            @Parameter(description = "Payment ID", example = "550e8400-e29b-41d4-a716-446655440000")
+            @PathVariable UUID paymentId,
             @RequestBody(required = false) CapturePaymentRequest request) {
         
         log.info("Capturing payment: {}", paymentId);
@@ -191,8 +192,8 @@ public class PaymentController {
     @PostMapping("/{paymentId}/cancel")
     @PreAuthorize("hasRole('STORE_OWNER') or hasRole('ADMINISTRATOR')")
     public ResponseEntity<PaymentResponse> cancelPayment(
-            @Parameter(description = "Payment ID", example = "1")
-            @PathVariable Long paymentId) {
+            @Parameter(description = "Payment ID", example = "550e8400-e29b-41d4-a716-446655440000")
+            @PathVariable UUID paymentId) {
         
         log.info("Cancelling payment: {}", paymentId);
 
@@ -213,8 +214,8 @@ public class PaymentController {
     })
     @GetMapping("/order/{orderId}")
     public ResponseEntity<List<PaymentResponse>> getOrderPayments(
-            @Parameter(description = "Order ID", example = "1")
-            @PathVariable Long orderId) {
+            @Parameter(description = "Order ID", example = "550e8400-e29b-41d4-a716-446655440001")
+            @PathVariable UUID orderId) {
         
         User currentUser = getCurrentUser();
         
@@ -313,8 +314,8 @@ public class PaymentController {
     })
     @PostMapping("/methods/{paymentMethodId}/default")
     public ResponseEntity<Void> setDefaultPaymentMethod(
-            @Parameter(description = "Payment Method ID", example = "1")
-            @PathVariable Long paymentMethodId) {
+            @Parameter(description = "Payment Method ID", example = "550e8400-e29b-41d4-a716-446655440002")
+            @PathVariable UUID paymentMethodId) {
         
         User currentUser = getCurrentUser();
         log.info("Setting default payment method for user: {} method: {}", currentUser.getEmail(), paymentMethodId);
@@ -334,8 +335,8 @@ public class PaymentController {
     })
     @DeleteMapping("/methods/{paymentMethodId}")
     public ResponseEntity<Void> removePaymentMethod(
-            @Parameter(description = "Payment Method ID", example = "1")
-            @PathVariable Long paymentMethodId) {
+            @Parameter(description = "Payment Method ID", example = "550e8400-e29b-41d4-a716-446655440002")
+            @PathVariable UUID paymentMethodId) {
         
         User currentUser = getCurrentUser();
         log.info("Removing payment method for user: {} method: {}", currentUser.getEmail(), paymentMethodId);

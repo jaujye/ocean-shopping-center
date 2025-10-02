@@ -19,7 +19,7 @@ import java.util.List;
 @Builder
 public class OrderResponse {
 
-    private Long id;
+    private String id;
     private String orderNumber;
     private OrderStatus status;
     private String customerEmail;

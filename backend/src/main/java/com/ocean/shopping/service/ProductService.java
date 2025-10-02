@@ -63,7 +63,7 @@ public class ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> ResourceNotFoundException.forEntity("Product", id));
 
-        if (!product.getIsActive()) {
+        if (!product.isActive()) {
             throw new ResourceNotFoundException("Product not found or not active");
         }
 
@@ -80,7 +80,7 @@ public class ProductService {
         Product product = productRepository.findBySlugAndStoreId(slug, storeId)
                 .orElseThrow(() -> ResourceNotFoundException.forField("Product", "slug", slug));
 
-        if (!product.getIsActive()) {
+        if (!product.isActive()) {
             throw new ResourceNotFoundException("Product not found or not active");
         }
 
@@ -285,7 +285,7 @@ public class ProductService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> ResourceNotFoundException.forEntity("Product", productId));
 
-        if (!product.getIsActive()) {
+        if (!product.isActive()) {
             return false;
         }
 

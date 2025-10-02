@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Service for handling refunds and payment reversals
@@ -34,7 +35,7 @@ public class RefundService {
      * Process full refund for an order
      */
     @Transactional
-    public void processFullRefund(Long orderId, String reason) {
+    public void processFullRefund(UUID orderId, String reason) {
         log.info("Processing full refund for order ID: {} with reason: {}", orderId, reason);
 
         Order order = orderRepository.findById(orderId)
@@ -86,7 +87,7 @@ public class RefundService {
      * Process partial refund for an order
      */
     @Transactional
-    public void processPartialRefund(Long orderId, BigDecimal refundAmount, String reason) {
+    public void processPartialRefund(UUID orderId, BigDecimal refundAmount, String reason) {
         log.info("Processing partial refund of {} for order ID: {}", refundAmount, orderId);
 
         Order order = orderRepository.findById(orderId)
@@ -144,7 +145,7 @@ public class RefundService {
      * Process refund for a specific payment
      */
     @Transactional
-    public void processPaymentRefund(Long paymentId, BigDecimal refundAmount, String reason) {
+    public void processPaymentRefund(UUID paymentId, BigDecimal refundAmount, String reason) {
         Payment payment = paymentRepository.findById(paymentId)
             .orElseThrow(() -> new ResourceNotFoundException("Payment not found: " + paymentId));
 
@@ -160,7 +161,7 @@ public class RefundService {
     /**
      * Check if order is eligible for refund
      */
-    public boolean isRefundEligible(Long orderId) {
+    public boolean isRefundEligible(UUID orderId) {
         try {
             Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found: " + orderId));
@@ -178,7 +179,7 @@ public class RefundService {
     /**
      * Get total refundable amount for an order
      */
-    public BigDecimal getRefundableAmount(Long orderId) {
+    public BigDecimal getRefundableAmount(UUID orderId) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new ResourceNotFoundException("Order not found: " + orderId));
 
@@ -193,7 +194,7 @@ public class RefundService {
      * Cancel refund (if supported by payment provider)
      */
     @Transactional
-    public void cancelRefund(Long paymentId, String reason) {
+    public void cancelRefund(UUID paymentId, String reason) {
         Payment payment = paymentRepository.findById(paymentId)
             .orElseThrow(() -> new ResourceNotFoundException("Payment not found: " + paymentId));
 

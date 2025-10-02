@@ -73,7 +73,7 @@ public class OrderManagementService {
      * Get order details for admin
      */
     @Transactional(readOnly = true)
-    public OrderResponse getOrderForAdmin(Long orderId) {
+    public OrderResponse getOrderForAdmin(UUID orderId) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
         return convertToOrderResponse(order);
@@ -129,7 +129,7 @@ public class OrderManagementService {
      * Get orders for a specific store
      */
     @Transactional(readOnly = true)
-    public Page<OrderSummaryResponse> getStoreOrders(Long storeId, Pageable pageable, 
+    public Page<OrderSummaryResponse> getStoreOrders(UUID storeId, Pageable pageable, 
                                                     OrderStatus status, ZonedDateTime startDate, ZonedDateTime endDate) {
         Store store = storeRepository.findById(storeId)
             .orElseThrow(() -> new ResourceNotFoundException("Store not found"));
@@ -153,7 +153,7 @@ public class OrderManagementService {
      * Search orders for a specific store
      */
     @Transactional(readOnly = true)
-    public Page<OrderSummaryResponse> searchStoreOrders(Long storeId, String searchTerm, Pageable pageable) {
+    public Page<OrderSummaryResponse> searchStoreOrders(UUID storeId, String searchTerm, Pageable pageable) {
         Store store = storeRepository.findById(storeId)
             .orElseThrow(() -> new ResourceNotFoundException("Store not found"));
             
@@ -165,7 +165,7 @@ public class OrderManagementService {
      * Get order details for store owner
      */
     @Transactional(readOnly = true)
-    public OrderResponse getStoreOrder(Long storeId, Long orderId) {
+    public OrderResponse getStoreOrder(UUID storeId, UUID orderId) {
         Store store = storeRepository.findById(storeId)
             .orElseThrow(() -> new ResourceNotFoundException("Store not found"));
             
@@ -183,7 +183,7 @@ public class OrderManagementService {
      * Get orders requiring attention for a store
      */
     @Transactional(readOnly = true)
-    public List<OrderSummaryResponse> getStoreOrdersRequiringAttention(Long storeId) {
+    public List<OrderSummaryResponse> getStoreOrdersRequiringAttention(UUID storeId) {
         Store store = storeRepository.findById(storeId)
             .orElseThrow(() -> new ResourceNotFoundException("Store not found"));
             
@@ -197,7 +197,7 @@ public class OrderManagementService {
      * Update order status
      */
     @Transactional
-    public void updateOrderStatus(Long orderId, OrderStatusUpdateRequest request, UUID updatedBy) {
+    public void updateOrderStatus(UUID orderId, OrderStatusUpdateRequest request, UUID updatedBy) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
 
@@ -248,7 +248,7 @@ public class OrderManagementService {
      * Process refund for an order
      */
     @Transactional
-    public void processRefund(Long orderId, BigDecimal amount, String reason, UUID processedBy) {
+    public void processRefund(UUID orderId, BigDecimal amount, String reason, UUID processedBy) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
 
@@ -284,7 +284,7 @@ public class OrderManagementService {
      * Get store revenue analytics
      */
     @Transactional(readOnly = true)
-    public Map<String, Object> getStoreRevenueAnalytics(Long storeId, ZonedDateTime startDate, ZonedDateTime endDate) {
+    public Map<String, Object> getStoreRevenueAnalytics(UUID storeId, ZonedDateTime startDate, ZonedDateTime endDate) {
         Store store = storeRepository.findById(storeId)
             .orElseThrow(() -> new ResourceNotFoundException("Store not found"));
 
@@ -379,7 +379,7 @@ public class OrderManagementService {
     // Conversion methods
     private OrderSummaryResponse convertToSummaryResponse(Order order) {
         return OrderSummaryResponse.builder()
-            .id(order.getId())
+            .id(order.getId().toString())
             .orderNumber(order.getOrderNumber())
             .status(order.getStatus())
             .customerEmail(order.getCustomerEmail())
@@ -387,7 +387,7 @@ public class OrderManagementService {
             .totalAmount(order.getTotalAmount())
             .currency(order.getCurrency())
             .itemCount(order.getOrderItems() != null ? order.getOrderItems().size() : 0)
-            .storeId(order.getStore().getId())
+            .storeId(order.getStore().getId().toString())
             .storeName(order.getStore().getName())
             .createdAt(order.getCreatedAt())
             .updatedAt(order.getUpdatedAt())
@@ -400,7 +400,7 @@ public class OrderManagementService {
 
     private OrderResponse convertToOrderResponse(Order order) {
         return OrderResponse.builder()
-            .id(order.getId())
+            .id(order.getId().toString())
             .orderNumber(order.getOrderNumber())
             .status(order.getStatus())
             .customerEmail(order.getCustomerEmail())
@@ -424,7 +424,7 @@ public class OrderManagementService {
             .totalAmount(order.getTotalAmount())
             .currency(order.getCurrency())
             .orderItems(convertToOrderItemResponses(order.getOrderItems()))
-            .storeId(order.getStore().getId())
+            .storeId(order.getStore().getId().toString())
             .storeName(order.getStore().getName())
             .createdAt(order.getCreatedAt())
             .updatedAt(order.getUpdatedAt())
@@ -442,20 +442,20 @@ public class OrderManagementService {
         
         return orderItems.stream()
             .map(item -> OrderItemResponse.builder()
-                .id(item.getId())
-                .productId(item.getProduct().getId())
+                .id(item.getId().toString())
+                .productId(item.getProduct().getId().toString())
                 .productName(item.getProduct().getName())
                 .productSku(item.getProduct().getSku())
                 .quantity(item.getQuantity())
                 .unitPrice(item.getUnitPrice())
                 .totalPrice(item.getTotalPrice())
-                .currency(item.getCurrency())
-                .variantName(item.getProductVariant() != null ? item.getProductVariant().getName() : null)
-                .variantSku(item.getProductVariant() != null ? item.getProductVariant().getSku() : null)
-                .storeId(item.getProduct().getStore().getId())
+                .currency(item.getOrder().getCurrency())
+                .variantName(item.getVariant() != null ? item.getVariant().getName() : null)
+                .variantSku(item.getVariant() != null ? item.getVariant().getSku() : null)
+                .storeId(item.getProduct().getStore().getId().toString())
                 .storeName(item.getProduct().getStore().getName())
                 .build())
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private boolean requiresAttention(Order order) {

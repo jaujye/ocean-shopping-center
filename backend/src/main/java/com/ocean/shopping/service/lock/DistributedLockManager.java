@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -11,6 +12,46 @@ import java.util.function.Supplier;
 /**
  * High-level distributed lock manager that provides convenient methods
  * for common locking patterns in the Ocean Shopping Center application.
+ *
+ * <h2>Lock Ordering to Prevent Deadlocks</h2>
+ * <p>To prevent deadlocks, always acquire locks in the following alphabetical order:</p>
+ * <ol>
+ *   <li><b>cart:</b> - Cart operations (cart:user:{userId} or cart:session:{sessionId})</li>
+ *   <li><b>inventory:</b> - Product inventory (inventory:product:{productId})</li>
+ *   <li><b>order:</b> - Order processing (order:process:{orderId})</li>
+ *   <li><b>payment:</b> - Payment operations (payment:process:{paymentId})</li>
+ *   <li><b>user:</b> - User updates (user:update:{userId})</li>
+ * </ol>
+ *
+ * <h3>Best Practices</h3>
+ * <ul>
+ *   <li>Use {@link #executeWithMultipleLocks(Collection, Callable)} when multiple locks are needed</li>
+ *   <li>This method automatically sorts locks to ensure consistent ordering</li>
+ *   <li>Never manually acquire locks in different orders across different code paths</li>
+ *   <li>Avoid nested lock acquisition - collect all required locks first, then acquire them together</li>
+ * </ul>
+ *
+ * <h3>Example - Correct Usage</h3>
+ * <pre>{@code
+ * // Correct: Collect all locks first, then acquire together
+ * List<String> allLocks = new ArrayList<>();
+ * allLocks.add(lockManager.inventoryLockKey(productId));
+ * allLocks.add(lockManager.paymentLockKey(orderId));
+ * lockManager.executeWithMultipleLocks(allLocks, () -> {
+ *     // All locks held in sorted order
+ *     processOrder();
+ * });
+ * }</pre>
+ *
+ * <h3>Example - Incorrect Usage (Deadlock Risk)</h3>
+ * <pre>{@code
+ * // WRONG: Nested lock acquisition can cause deadlocks
+ * lockManager.executeWithLock(inventoryKey, () -> {
+ *     lockManager.executeWithLock(paymentKey, () -> {
+ *         processOrder(); // Deadlock risk!
+ *     });
+ * });
+ * }</pre>
  */
 @Service
 @RequiredArgsConstructor
@@ -106,6 +147,69 @@ public class DistributedLockManager {
             return fallbackTask.get();
         }
         return result;
+    }
+
+    /**
+     * Execute code with multiple distributed locks acquired in sorted order to prevent deadlocks.
+     * Locks are sorted alphabetically before acquisition to ensure consistent lock ordering.
+     *
+     * @param lockKeys Collection of lock keys to acquire
+     * @param task The task to execute with all locks held
+     * @param <T> Return type
+     * @return Task result
+     * @throws LockAcquisitionException if any lock cannot be acquired
+     */
+    public <T> T executeWithMultipleLocks(Collection<String> lockKeys, Callable<T> task) throws LockAcquisitionException {
+        if (lockKeys == null || lockKeys.isEmpty()) {
+            try {
+                return task.call();
+            } catch (Exception e) {
+                throw new RuntimeException("Error executing task without locks", e);
+            }
+        }
+
+        // Sort lock keys to ensure consistent acquisition order and prevent deadlocks
+        List<String> sortedKeys = new ArrayList<>(lockKeys);
+        Collections.sort(sortedKeys);
+
+        log.debug("Acquiring {} locks in order: {}", sortedKeys.size(), sortedKeys);
+        return acquireLocksRecursively(sortedKeys, 0, new ArrayList<>(), task);
+    }
+
+    /**
+     * Recursively acquire locks in order
+     */
+    private <T> T acquireLocksRecursively(List<String> lockKeys, int index, List<String> acquiredTokens, Callable<T> task) {
+        if (index >= lockKeys.size()) {
+            // All locks acquired, execute task
+            try {
+                return task.call();
+            } catch (Exception e) {
+                throw new RuntimeException("Error executing task with locks", e);
+            } finally {
+                // Release all locks in reverse order
+                for (int i = acquiredTokens.size() - 1; i >= 0; i--) {
+                    distributedLock.release(lockKeys.get(i), acquiredTokens.get(i));
+                }
+            }
+        }
+
+        // Acquire next lock
+        String lockKey = lockKeys.get(index);
+        String token = distributedLock.acquire(lockKey, 30, TimeUnit.SECONDS, 5);
+
+        if (token == null) {
+            // Failed to acquire lock, release all previously acquired locks
+            for (int i = acquiredTokens.size() - 1; i >= 0; i--) {
+                distributedLock.release(lockKeys.get(i), acquiredTokens.get(i));
+            }
+            throw new LockAcquisitionException("Could not acquire lock for key: " + lockKey);
+        }
+
+        acquiredTokens.add(token);
+
+        // Continue acquiring remaining locks
+        return acquireLocksRecursively(lockKeys, index + 1, acquiredTokens, task);
     }
 
     // Convenience methods for common lock key patterns

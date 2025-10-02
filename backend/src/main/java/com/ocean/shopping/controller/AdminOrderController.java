@@ -91,7 +91,7 @@ public class AdminOrderController {
      */
     @GetMapping("/{orderId}")
     public ResponseEntity<OrderResponse> getOrderForAdmin(
-            @PathVariable Long orderId,
+            @PathVariable UUID orderId,
             Authentication authentication) {
         
         try {
@@ -132,7 +132,7 @@ public class AdminOrderController {
      */
     @PutMapping("/{orderId}/status")
     public ResponseEntity<String> updateOrderStatus(
-            @PathVariable Long orderId,
+            @PathVariable UUID orderId,
             @Valid @RequestBody OrderStatusUpdateRequest request,
             Authentication authentication) {
         
@@ -154,7 +154,7 @@ public class AdminOrderController {
      */
     @PostMapping("/{orderId}/refund")
     public ResponseEntity<String> processRefund(
-            @PathVariable Long orderId,
+            @PathVariable UUID orderId,
             @RequestParam BigDecimal amount,
             @RequestParam String reason,
             Authentication authentication) {
@@ -297,7 +297,7 @@ public class AdminOrderController {
      */
     @PutMapping("/{orderId}/force-status")
     public ResponseEntity<String> forceOrderStatus(
-            @PathVariable Long orderId,
+            @PathVariable UUID orderId,
             @RequestParam OrderStatus status,
             @RequestParam String reason,
             Authentication authentication) {

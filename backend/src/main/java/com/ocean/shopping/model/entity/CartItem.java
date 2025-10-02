@@ -148,7 +148,7 @@ public class CartItem extends BaseEntity {
         if (product == null) return false;
         
         // Check if product is active
-        if (!product.getIsActive()) return false;
+        if (!product.isActive()) return false;
         
         // Check inventory if tracking is enabled
         if (product.getTrackInventory()) {

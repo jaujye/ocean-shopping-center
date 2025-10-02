@@ -14,9 +14,10 @@ import org.springframework.stereotype.Repository;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface PaymentRepository extends JpaRepository<Payment, Long> {
+public interface PaymentRepository extends JpaRepository<Payment, UUID> {
 
     /**
      * Find payment by transaction ID
@@ -36,7 +37,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     /**
      * Find payments by order ID
      */
-    List<Payment> findByOrder_IdOrderByCreatedAtDesc(Long orderId);
+    List<Payment> findByOrder_IdOrderByCreatedAtDesc(UUID orderId);
 
     /**
      * Find payments by status
@@ -117,11 +118,11 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
      * Find recent payments by user
      */
     @Query("SELECT p FROM Payment p WHERE p.order.user.id = :userId ORDER BY p.createdAt DESC")
-    Page<Payment> findRecentPaymentsByUser(@Param("userId") Long userId, Pageable pageable);
+    Page<Payment> findRecentPaymentsByUser(@Param("userId") UUID userId, Pageable pageable);
 
     /**
      * Find payments by store
      */
     @Query("SELECT p FROM Payment p WHERE p.order.store.id = :storeId ORDER BY p.createdAt DESC")
-    Page<Payment> findPaymentsByStore(@Param("storeId") Long storeId, Pageable pageable);
+    Page<Payment> findPaymentsByStore(@Param("storeId") UUID storeId, Pageable pageable);
 }

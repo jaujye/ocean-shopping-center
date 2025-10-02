@@ -7,7 +7,13 @@
       "mcp__context7__get-library-docs",
       "Bash(npm install:*)",
       "Bash(npm run build:*)",
-      "mcp__graphiti_ocean-shopping-center__add_memory"
+      "mcp__graphiti_ocean-shopping-center__add_memory",
+      "Bash(git commit:*)",
+      "Bash(mvn test:*)",
+      "Bash(git checkout:*)",
+      "Bash(mvn clean:*)",
+      "Bash(mvn:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []
