@@ -187,15 +187,15 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
 
     try {
       await cartService.clearCart();
-      dispatch({ type: 'SET_CART', payload: { 
-        id: 'empty-cart', 
-        items: [], 
-        itemCount: 0, 
-        subtotal: 0, 
-        taxAmount: 0, 
-        shippingFee: 0, 
-        total: 0, 
-        totalAmount: 0 
+      dispatch({ type: 'SET_CART', payload: {
+        id: 'empty-cart',
+        items: [],
+        itemCount: 0,
+        subtotal: 0,
+        taxAmount: 0,
+        shippingFee: 0,
+        discountAmount: 0,
+        total: 0
       } });
       
       showNotification('success', 'All items removed from your cart', 3000);

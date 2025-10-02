@@ -121,7 +121,7 @@ public class CartService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> ResourceNotFoundException.forEntity("Product", productId));
 
-        if (!product.getIsActive()) {
+        if (!product.isActive()) {
             throw new BadRequestException("Product is not active");
         }
 
@@ -492,7 +492,7 @@ public class CartService {
             Product product = item.getProduct();
 
             // Check if product is still active
-            if (!product.getIsActive()) {
+            if (!product.isActive()) {
                 issues.add("Product '" + product.getName() + "' is no longer available");
                 continue;
             }

@@ -144,11 +144,7 @@ public class OrderService {
                 order = orderRepository.save(order);
 
                 // Clear cart after successful order
-                if (userId != null) {
-                    cartService.clearCart(userId);
-                } else {
-                    cartService.clearSessionCart(sessionId);
-                }
+                cartService.clearCart(userId, sessionId);
 
                 // Send confirmation email asynchronously
                 CompletableFuture.runAsync(() -> sendOrderConfirmationEmail(order));
@@ -302,7 +298,7 @@ public class OrderService {
             }
             
             // Check stock availability
-            if (product.getStockQuantity() != null && product.getStockQuantity() < cartItem.getQuantity()) {
+            if (product.getInventoryQuantity() != null && product.getInventoryQuantity() < cartItem.getQuantity()) {
                 throw new BadRequestException("Insufficient stock for product " + product.getName());
             }
             

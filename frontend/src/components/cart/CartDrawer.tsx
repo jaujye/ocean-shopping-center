@@ -135,15 +135,15 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, className }) =
     setIsLoading(true);
     try {
       await cartService.clearCart();
-      setCart({ 
-        id: 'empty-cart', 
-        items: [], 
-        itemCount: 0, 
-        subtotal: 0, 
-        taxAmount: 0, 
-        shippingFee: 0, 
-        total: 0, 
-        totalAmount: 0 
+      setCart({
+        id: 'empty-cart',
+        items: [],
+        itemCount: 0,
+        subtotal: 0,
+        taxAmount: 0,
+        shippingFee: 0,
+        discountAmount: 0,
+        total: 0
       });
     } catch (error) {
       console.error('Failed to clear cart:', error);

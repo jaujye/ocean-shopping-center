@@ -203,15 +203,13 @@ export interface Cart {
   id: string;
   items: CartItem[];
   itemCount: number;
-  totalItems?: number;
   subtotal: number;
   taxAmount: number;
   shippingFee: number;
-  discountAmount?: number;
+  discountAmount: number;
   couponDiscount?: number;
   appliedCouponCode?: string;
   total: number;
-  totalAmount: number;
   currency?: string;
 }
 

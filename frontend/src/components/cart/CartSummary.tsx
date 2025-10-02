@@ -69,7 +69,7 @@ const CartSummary: React.FC<CartSummaryProps> = ({
           <h3 className="text-lg font-semibold text-gray-900">Order Summary</h3>
           <div className="flex items-center text-sm text-gray-500">
             <ShoppingCartIcon className="w-4 h-4 mr-1" />
-            {cart.totalItems} {cart.totalItems === 1 ? 'item' : 'items'}
+            {cart.itemCount} {cart.itemCount === 1 ? 'item' : 'items'}
           </div>
         </div>
       </div>
@@ -79,7 +79,7 @@ const CartSummary: React.FC<CartSummaryProps> = ({
         {/* Subtotal */}
         <div className="flex justify-between text-sm">
           <span className="text-gray-600">
-            Subtotal ({cart.totalItems} {cart.totalItems === 1 ? 'item' : 'items'})
+            Subtotal ({cart.itemCount} {cart.itemCount === 1 ? 'item' : 'items'})
           </span>
           <span className="font-medium text-gray-900">
             ${cart.subtotal.toFixed(2)}
