@@ -17,6 +17,7 @@ import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
@@ -32,7 +33,6 @@ import java.util.Arrays;
 @EnableRedisHttpSession(maxInactiveIntervalInSeconds = 86400) // 24 hours
 @Slf4j
 @ConditionalOnProperty(name = "spring.session.store-type", havingValue = "redis", matchIfMissing = true)
-@Profile("!test")
 public class RedisConfig {
 
     // Standalone configuration
@@ -168,6 +168,13 @@ public class RedisConfig {
         template.setDefaultSerializer(jsonSerializer);
         template.afterPropertiesSet();
 
+        return template;
+    }
+
+    @Bean
+    public StringRedisTemplate stringRedisTemplate(RedisConnectionFactory connectionFactory) {
+        StringRedisTemplate template = new StringRedisTemplate();
+        template.setConnectionFactory(connectionFactory);
         return template;
     }
 

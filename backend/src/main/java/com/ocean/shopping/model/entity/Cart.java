@@ -242,6 +242,13 @@ public class Cart extends BaseEntity {
         this.mergedFromSession = fromSessionId;
     }
 
+    /**
+     * Get cart items (alias for items field)
+     */
+    public List<CartItem> getCartItems() {
+        return items;
+    }
+
     @PrePersist
     @PreUpdate
     private void updateTotals() {
