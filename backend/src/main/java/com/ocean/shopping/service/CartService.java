@@ -7,6 +7,7 @@ import com.ocean.shopping.repository.ProductRepository;
 import com.ocean.shopping.exception.BadRequestException;
 import com.ocean.shopping.exception.ResourceNotFoundException;
 import com.ocean.shopping.service.lock.DistributedLockManager;
+import com.ocean.shopping.service.validator.CartValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -35,6 +36,7 @@ public class CartService {
     private final UserService userService;
     private final RedisTemplate<String, Object> redisTemplate;
     private final DistributedLockManager lockManager;
+    private final CartValidator cartValidator;
 
     // Constants
     private static final String CART_CACHE_PREFIX = "cart:";
@@ -121,13 +123,10 @@ public class CartService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> ResourceNotFoundException.forEntity("Product", productId));
 
-        if (!product.isActive()) {
-            throw new BadRequestException("Product is not active");
-        }
-
-        // Check inventory with fresh data (within lock)
-        if (product.getTrackInventory() && quantity > product.getInventoryQuantity()) {
-            throw new BadRequestException("Insufficient inventory. Available: " + product.getInventoryQuantity());
+        // Validate product availability and stock using centralized validator
+        CartValidator.ValidationResult validation = cartValidator.validateCartItem(product, quantity);
+        if (!validation.isValid()) {
+            throw new BadRequestException(String.join("; ", validation.getIssues()));
         }
 
         Cart cart = userId != null ? getUserCart(userId) : getSessionCart(sessionId);
@@ -139,10 +138,11 @@ public class CartService {
             // Update quantity of existing item
             CartItem item = existingItem.get();
             int newQuantity = item.getQuantity() + quantity;
-            
-            // Re-check inventory with new total quantity
-            if (product.getTrackInventory() && newQuantity > product.getInventoryQuantity()) {
-                throw new BadRequestException("Total quantity exceeds available inventory");
+
+            // Re-validate with new total quantity
+            CartValidator.ValidationResult quantityValidation = cartValidator.validateCartItem(product, newQuantity);
+            if (!quantityValidation.isValid()) {
+                throw new BadRequestException(String.join("; ", quantityValidation.getIssues()));
             }
             
             item.updateQuantity(newQuantity);
@@ -206,10 +206,13 @@ public class CartService {
             throw new BadRequestException("Cart item does not belong to user or session");
         }
 
-        // Check inventory with fresh data (within lock)
+        // Validate quantity with centralized validator
         Product product = cartItem.getProduct();
-        if (product.getTrackInventory() && quantity > product.getInventoryQuantity()) {
-            throw new BadRequestException("Insufficient inventory. Available: " + product.getInventoryQuantity());
+        CartValidator.ValidationResult validation = cartValidator.validateCartItem(
+            product, cartItem.getProductVariant(), quantity
+        );
+        if (!validation.isValid()) {
+            throw new BadRequestException(String.join("; ", validation.getIssues()));
         }
 
         cartItem.updateQuantity(quantity);
@@ -491,21 +494,19 @@ public class CartService {
         for (CartItem item : cart.getItems()) {
             Product product = item.getProduct();
 
-            // Check if product is still active
-            if (!product.isActive()) {
-                issues.add("Product '" + product.getName() + "' is no longer available");
-                continue;
-            }
+            // Use centralized validator for product availability and stock
+            CartValidator.ValidationResult validation = cartValidator.validateCartItem(
+                product, item.getProductVariant(), item.getQuantity()
+            );
 
-            // Check inventory
-            if (product.getTrackInventory() && item.getQuantity() > product.getInventoryQuantity()) {
-                if (product.getInventoryQuantity() > 0) {
-                    item.updateQuantity(product.getInventoryQuantity());
+            if (!validation.isValid()) {
+                issues.addAll(validation.getIssues());
+
+                // Auto-adjust quantity if recommended
+                if (validation.getRecommendedQuantity() != null && validation.getRecommendedQuantity() > 0) {
+                    item.updateQuantity(validation.getRecommendedQuantity());
                     cartItemRepository.save(item);
                     cartUpdated = true;
-                    issues.add("Quantity reduced for '" + product.getName() + "' due to limited stock");
-                } else {
-                    issues.add("Product '" + product.getName() + "' is out of stock");
                 }
             }
 

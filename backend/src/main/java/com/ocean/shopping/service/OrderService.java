@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -73,21 +74,29 @@ public class OrderService {
                 throw new BadRequestException("Cart is empty");
             }
 
-            // Collect all inventory locks needed for this order
-            List<String> inventoryLockKeys = cart.getItems().stream()
-                    .map(item -> lockManager.inventoryLockKey(item.getProduct().getId().toString()))
-                    .collect(Collectors.toList());
+            // Collect all lock keys upfront to prevent deadlocks
+            List<String> allLockKeys = new ArrayList<>();
 
-            // Execute with multiple inventory locks
-            return executeWithInventoryLocks(inventoryLockKeys, () -> {
-                // Validate cart items and update prices (within inventory locks)
+            // Add inventory locks
+            cart.getItems().stream()
+                    .map(item -> lockManager.inventoryLockKey(item.getProduct().getId().toString()))
+                    .distinct()
+                    .forEach(allLockKeys::add);
+
+            // Generate order ID early to create payment lock key
+            UUID orderId = UUID.randomUUID();
+            allLockKeys.add(lockManager.paymentLockKey(orderId.toString()));
+
+            // Execute with all locks acquired in sorted order (prevents deadlocks)
+            return lockManager.executeWithMultipleLocks(allLockKeys, () -> {
+                // Validate cart items and update prices
                 validateAndUpdateCart(cart);
 
-                // Create order from cart
-                Order order = createOrderFromCart(cart, request);
+                // Create order from cart with pre-generated ID
+                Order order = createOrderFromCart(cart, request, orderId);
 
-                // Process payment with lock protection
-                return processPaymentAndFinalizeOrder(order, request, userId, sessionId, cart);
+                // Process payment (no additional locking needed)
+                return processPaymentAndFinalizeOrderWithoutLock(order, request, userId, sessionId, cart);
             });
 
         } catch (Exception e) {
@@ -96,73 +105,49 @@ public class OrderService {
         }
     }
 
-    /**
-     * Execute operation with multiple inventory locks
-     */
-    private CheckoutResponse executeWithInventoryLocks(List<String> lockKeys, Callable<CheckoutResponse> operation) {
-        if (lockKeys.isEmpty()) {
-            try {
-                return operation.call();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        String firstLock = lockKeys.get(0);
-        List<String> remainingLocks = lockKeys.subList(1, lockKeys.size());
-
-        return lockManager.executeWithLockOrThrow(firstLock, () -> {
-            return executeWithInventoryLocks(remainingLocks, operation);
-        });
-    }
 
     /**
-     * Process payment and finalize order
+     * Process payment and finalize order (assumes locks are already held)
      */
-    private CheckoutResponse processPaymentAndFinalizeOrder(Order order, CheckoutRequest request, 
+    private CheckoutResponse processPaymentAndFinalizeOrderWithoutLock(Order order, CheckoutRequest request,
                                                            UUID userId, String sessionId, Cart cart) {
-        // Generate unique payment lock key for this order
-        String paymentLockKey = lockManager.paymentLockKey(order.getId().toString());
-        
         try {
-            return lockManager.executeWithLockOrThrow(paymentLockKey, () -> {
-                // Process payment
-                PaymentProviderService.PaymentIntent paymentIntent = 
-                    paymentService.createPaymentIntent(order, PaymentProvider.STRIPE);
+            // Process payment
+            PaymentProviderService.PaymentIntent paymentIntent =
+                paymentService.createPaymentIntent(order, PaymentProvider.STRIPE);
 
-                // Confirm payment
-                PaymentProviderService.PaymentResult paymentResult = 
-                    paymentService.confirmPayment(paymentIntent.id(), request.getPaymentMethodId());
+            // Confirm payment
+            PaymentProviderService.PaymentResult paymentResult =
+                paymentService.confirmPayment(paymentIntent.id(), request.getPaymentMethodId());
 
-                if (!"succeeded".equals(paymentResult.status())) {
-                    throw new BadRequestException("Payment failed: " + paymentResult.failureReason());
-                }
+            if (!"succeeded".equals(paymentResult.status())) {
+                throw new BadRequestException("Payment failed: " + paymentResult.failureReason());
+            }
 
-                // Update order status after successful payment
-                order.setStatus(OrderStatus.CONFIRMED);
-                order.setConfirmedAt(ZonedDateTime.now());
-                order = orderRepository.save(order);
+            // Update order status after successful payment
+            order.setStatus(OrderStatus.CONFIRMED);
+            order.setConfirmedAt(ZonedDateTime.now());
+            order = orderRepository.save(order);
 
-                // Clear cart after successful order
-                cartService.clearCart(userId, sessionId);
+            // Clear cart after successful order
+            cartService.clearCart(userId, sessionId);
 
-                // Send confirmation email asynchronously
-                CompletableFuture.runAsync(() -> sendOrderConfirmationEmail(order));
+            // Send confirmation email asynchronously
+            CompletableFuture.runAsync(() -> sendOrderConfirmationEmail(order));
 
-                // Create shipment if needed
-                CompletableFuture.runAsync(() -> createShipmentForOrder(order));
+            // Create shipment if needed
+            CompletableFuture.runAsync(() -> createShipmentForOrder(order));
 
-                log.info("Checkout completed successfully for order: {}", order.getOrderNumber());
+            log.info("Checkout completed successfully for order: {}", order.getOrderNumber());
 
-                return CheckoutResponse.success(
-                    order.getId(),
-                    order.getOrderNumber(),
-                    order.getTotalAmount(),
-                    order.getCurrency(),
-                    paymentIntent.id(),
-                    order.getCustomerEmail()
-                );
-            });
+            return CheckoutResponse.success(
+                order.getId(),
+                order.getOrderNumber(),
+                order.getTotalAmount(),
+                order.getCurrency(),
+                paymentIntent.id(),
+                order.getCustomerEmail()
+            );
         } catch (Exception e) {
             log.error("Checkout failed: {}", e.getMessage(), e);
             return CheckoutResponse.error("Checkout failed: " + e.getMessage());
@@ -312,7 +297,7 @@ public class OrderService {
         }
     }
 
-    private Order createOrderFromCart(Cart cart, CheckoutRequest request) {
+    private Order createOrderFromCart(Cart cart, CheckoutRequest request, UUID orderId) {
         // Generate unique order number
         String orderNumber = generateOrderNumber();
 
@@ -323,8 +308,9 @@ public class OrderService {
         BigDecimal discountAmount = BigDecimal.ZERO; // TODO: Apply coupon if provided
         BigDecimal totalAmount = subtotal.add(taxAmount).add(shippingAmount).subtract(discountAmount);
 
-        // Create order
+        // Create order with pre-generated ID
         Order order = Order.builder()
+            .id(orderId)
             .orderNumber(orderNumber)
             .user(cart.getUser())
             .store(determineStoreFromCart(cart))
