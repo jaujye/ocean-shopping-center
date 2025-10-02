@@ -45,24 +45,26 @@ public class CartService {
     private static final int ABANDONED_CART_THRESHOLD_HOURS = 24;
 
     /**
-     * Get or create cart for authenticated user
+     * Get or create cart for authenticated user.
+     * This method will return an existing active cart or create a new one if none exists.
      */
     @Transactional(readOnly = true)
-    public Cart getUserCart(UUID userId) {
-        log.debug("Getting cart for user: {}", userId);
+    public Cart getOrCreateUserCart(UUID userId) {
+        log.debug("Getting or creating cart for user: {}", userId);
 
         User user = userService.getUserById(userId);
-        
+
         return cartRepository.findByUserIdAndStatus(userId, Cart.CartStatus.ACTIVE)
                 .orElseGet(() -> createUserCart(user));
     }
 
     /**
-     * Get or create cart for session (guest user)
+     * Get or create cart for session (guest user).
+     * This method will return an existing active cart or create a new one if none exists.
      */
     @Transactional(readOnly = true)
-    public Cart getSessionCart(String sessionId) {
-        log.debug("Getting cart for session: {}", sessionId);
+    public Cart getOrCreateSessionCart(String sessionId) {
+        log.debug("Getting or creating cart for session: {}", sessionId);
 
         if (!StringUtils.hasText(sessionId)) {
             throw new BadRequestException("Session ID is required");
@@ -129,7 +131,7 @@ public class CartService {
             throw new BadRequestException(String.join("; ", validation.getIssues()));
         }
 
-        Cart cart = userId != null ? getUserCart(userId) : getSessionCart(sessionId);
+        Cart cart = userId != null ? getOrCreateUserCart(userId) : getOrCreateSessionCart(sessionId);
         
         // Check if item already exists in cart
         Optional<CartItem> existingItem = findExistingCartItem(cart, productId, productVariantId, selectedOptions);
@@ -369,7 +371,7 @@ public class CartService {
     public Cart applyCoupon(UUID userId, String sessionId, String couponCode) {
         log.debug("Applying coupon to cart - User: {}, Session: {}, Coupon: {}", userId, sessionId, couponCode);
 
-        Cart cart = userId != null ? getUserCart(userId) : getSessionCart(sessionId);
+        Cart cart = userId != null ? getOrCreateUserCart(userId) : getOrCreateSessionCart(sessionId);
         
         // TODO: Implement coupon validation and discount calculation
         // This will be implemented in Stream 4
@@ -392,7 +394,7 @@ public class CartService {
     public Cart removeCoupon(UUID userId, String sessionId) {
         log.debug("Removing coupon from cart - User: {}, Session: {}", userId, sessionId);
 
-        Cart cart = userId != null ? getUserCart(userId) : getSessionCart(sessionId);
+        Cart cart = userId != null ? getOrCreateUserCart(userId) : getOrCreateSessionCart(sessionId);
         
         cart.removeCoupon();
         Cart savedCart = cartRepository.save(cart);
@@ -411,7 +413,7 @@ public class CartService {
     public Cart mergeGuestCart(UUID userId, String guestSessionId) {
         log.debug("Merging guest cart with user cart - User: {}, Guest Session: {}", userId, guestSessionId);
 
-        Cart userCart = getUserCart(userId);
+        Cart userCart = getOrCreateUserCart(userId);
         Optional<Cart> guestCartOpt = cartRepository.findBySessionIdAndStatus(guestSessionId, Cart.CartStatus.ACTIVE);
 
         if (guestCartOpt.isEmpty()) {
@@ -474,7 +476,7 @@ public class CartService {
         if (userId != null) {
             return (int) cartItemRepository.countActiveItemsByUserId(userId);
         } else if (StringUtils.hasText(sessionId)) {
-            Cart cart = getSessionCart(sessionId);
+            Cart cart = getOrCreateSessionCart(sessionId);
             return cart.getTotalItems();
         }
         return 0;
@@ -487,7 +489,7 @@ public class CartService {
     public List<String> validateCart(UUID userId, String sessionId) {
         log.debug("Validating cart - User: {}, Session: {}", userId, sessionId);
 
-        Cart cart = userId != null ? getUserCart(userId) : getSessionCart(sessionId);
+        Cart cart = userId != null ? getOrCreateUserCart(userId) : getOrCreateSessionCart(sessionId);
         List<String> issues = new ArrayList<>();
         boolean cartUpdated = false;
 

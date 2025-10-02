@@ -75,19 +75,23 @@ public class OrderService {
             }
 
             // Collect all lock keys upfront to prevent deadlocks
+            // Lock ordering: inventory → payment (alphabetical order enforced by executeWithMultipleLocks)
             List<String> allLockKeys = new ArrayList<>();
 
-            // Add inventory locks
+            // Add inventory locks for all products in cart
             cart.getItems().stream()
                     .map(item -> lockManager.inventoryLockKey(item.getProduct().getId().toString()))
                     .distinct()
                     .forEach(allLockKeys::add);
 
             // Generate order ID early to create payment lock key
+            // This allows us to acquire payment lock upfront instead of nesting locks
             UUID orderId = UUID.randomUUID();
             allLockKeys.add(lockManager.paymentLockKey(orderId.toString()));
 
-            // Execute with all locks acquired in sorted order (prevents deadlocks)
+            // Execute with all locks acquired in sorted order
+            // DistributedLockManager.executeWithMultipleLocks() automatically sorts keys
+            // to ensure consistent lock ordering and prevent deadlocks
             return lockManager.executeWithMultipleLocks(allLockKeys, () -> {
                 // Validate cart items and update prices
                 validateAndUpdateCart(cart);
@@ -265,9 +269,9 @@ public class OrderService {
 
     private Cart getCartForCheckout(UUID userId, String sessionId) {
         if (userId != null) {
-            return cartService.getUserCart(userId);
+            return cartService.getOrCreateUserCart(userId);
         } else if (sessionId != null) {
-            return cartService.getSessionCart(sessionId);
+            return cartService.getOrCreateSessionCart(sessionId);
         }
         throw new BadRequestException("Either user ID or session ID must be provided");
     }
